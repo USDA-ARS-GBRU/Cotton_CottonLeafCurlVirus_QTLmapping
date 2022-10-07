@@ -51,6 +51,13 @@ server <- function(input, output) {
     #output$value1 <- reactive({ input$parentAInput })
     #output$value2 <- reactive({ input$parentBInput })
     #output$value3 <- reactive({ input$variable })
+    #dafault_val <- 0.05
+    
+    #observe({
+    #    if (!is.numeric(input$hetLevel)) {
+    #        updateNumericInput(session, "hetLevel", value = dafault_val)
+    #    }
+    #})
     dataFunctional <- reactive({
         req(input$file1)
         filename = function() {
