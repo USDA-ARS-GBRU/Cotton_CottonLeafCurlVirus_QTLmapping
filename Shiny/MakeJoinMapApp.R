@@ -22,7 +22,9 @@ table = read.csv("TableS1 - Sheet1.csv")
 ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
-            fileInput("file1", "Choose CSV File", accept = ".csv"),
+            fileInput("file1", "Choose txt/CSV File", accept = c("text/csv", 
+                                                                 "text/comma-separated-values,text/plain",
+                                                                 ".csv", ".txt")),
             selectInput("variable", "Select the Population Type:",
                         c("F2" = "F2",
                           "F3" = "F3",
@@ -66,15 +68,22 @@ server <- function(input, output, session) {
             updateNumericInput(session, "hetLevel", value = dafault_val)
         }
     })
+    
     observeEvent( input$submit, {
         file <- input$file1
         ext <- tools::file_ext(file$datapath)
         
         req(file)
-        validate(need(ext == "csv", "Please upload a csv file"))
+        #validate(need(ext == "csv", "Please upload a csv file"))
         
         #read.csv(file$datapath, skip = 9, check.names = FALSE)
-        data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        if (tolower(tools::file_ext(file$datapath)) == "csv")
+        {
+            data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        } else
+        {
+            data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
+        }
         #set the row names to be the 1st column
         #rownames(data) <- data[,1]
         #remove 1st column
@@ -192,10 +201,16 @@ server <- function(input, output, session) {
             ext <- tools::file_ext(file$datapath)
             
             req(file)
-            validate(need(ext == "csv", "Please upload a csv file"))
+            #validate(need(ext == "csv", "Please upload a csv file"))
             cat("enter program \n")
             #read.csv(file$datapath, skip = 9, check.names = FALSE)
-            data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+            if (tolower(tools::file_ext(file$datapath)) == "csv")
+            {
+                data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+            } else
+            {
+                data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
+            }
             rownames(data) = data[,1]
             data = data[,c(2:ncol(data))]
             data <- as.data.frame(data, check.names = FALSE)
@@ -326,18 +341,18 @@ server <- function(input, output, session) {
     #         coord_flip()
     # })
     output$markerIndBar <- renderPlot({
-        req(input$file1)
-        filename = function() {
-            file2 <- input$file1
-            ext <- tools::file_ext(file2$datapath)
-            paste(file2, "_JoinMapFile.loc", sep = "")
-        }
         file <- input$file1
         ext <- tools::file_ext(file$datapath)
         
         req(file)
-        validate(need(ext == "csv", "Please upload a csv file"))
-        data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        if (tolower(tools::file_ext(file$datapath)) == "csv")
+        {
+            data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        } else
+        {
+            data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
+        }
+        #data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
         rownames(data) = data[,1]
         data = data[,c(2:ncol(data))]
         data <- as.data.frame(data, check.names = FALSE)
