@@ -351,3 +351,13 @@ server <- function(input, output) {
 }
 
 shinyApp(ui, server)
+        
+#        for (j in 1:ncol(dataFunctional)){ cat(j)
+#    tmp = c(1:ncol(dataFunctional))
+#    if((dataFunctional[1,j] != "AA") && (dataFunctional[1,j] != "TT") && (dataFunctional[1,j] != "CC") && (dataFunctional[1,j] != "GG") && (dataFunctional[1,j] != "--")){
+#        cat(j, "if \n")
+#		tmp[j] = 1
+#    } else{
+#cat(j, "else \n")
+#        tmp[j] = 0}
+#}
