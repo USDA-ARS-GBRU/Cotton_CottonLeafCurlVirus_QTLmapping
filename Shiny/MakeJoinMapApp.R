@@ -15,6 +15,7 @@ library(shiny)
 library(dplyr)
 library(stringr)
 library(ggplot2)
+library(reshape2)
 table = read.csv("TableS1 - Sheet1.csv")
 
 # Define UI for application that draws a histogram
@@ -47,17 +48,24 @@ ui <- fluidPage(
             
         ),
         mainPanel(
-            plotOutput("markerHetBar"),
+            #plotOutput("markerHetBar"),
             plotOutput("markerIndBar")
         )
     )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
     options(shiny.maxRequestSize=50*1024^2)
     #output$value1 <- reactive({ input$parentAInput })
     #output$value2 <- reactive({ input$parentBInput })
     #output$value3 <- reactive({ input$variable })
+    dafault_val <- 0.05
+    
+    observe({
+        if (!is.numeric(input$hetLevel)) {
+            updateNumericInput(session, "hetLevel", value = dafault_val)
+        }
+    })
     observeEvent( input$submit, {
         file <- input$file1
         ext <- tools::file_ext(file$datapath)
@@ -244,12 +252,13 @@ server <- function(input, output) {
                                MARGIN = 1,
                                function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional)
             
-            cat("hetPercent", dim(hetPercent), "\n")
+            cat("hetPercent", length(hetPercent), "\n")
+            cat("hetPercent", as.numeric(input$hetLevel), typeof(as.numeric(input$hetLevel)), "\n")
             
-            if (hetPercent[1] >= 0.05){temp = TRUE
+            if (hetPercent[1] >= as.numeric(input$hetLevel)){temp = TRUE
             } else {temp = FALSE}
             for(i in 2:length(hetPercent)){
-                if (hetPercent[i] >= 0.05){tmp = TRUE
+                if (hetPercent[i] >= as.numeric(input$hetLevel)){tmp = TRUE
                 } else {tmp = FALSE}
                 temp = rbind(temp,tmp)
             }
@@ -265,55 +274,57 @@ server <- function(input, output) {
             makeJoinMapF2File(outFile = filename, population.recast = population.recast)
         }
     )
-    output$markerHetBar <- renderPlot({
-        req(input$file1)
-        filename = function() {
-            file2 <- input$file1
-            ext <- tools::file_ext(file2$datapath)
-            paste(file2, "_JoinMapFile.loc", sep = "")
-        }
-        file <- input$file1
-        ext <- tools::file_ext(file$datapath)
-        
-        req(file)
-        validate(need(ext == "csv", "Please upload a csv file"))
-        data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
-        rownames(data) = data[,1]
-        data = data[,c(2:ncol(data))]
-        data <- as.data.frame(data, check.names = FALSE)
-        
-        rownames(table) = table[,1]
-        #cat("table", dim(table), " \n")
-        table_s = table[rownames(table) %in% rownames(data),]
-        f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
-        dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
-        
-        hetPercent = apply(dataFunctional, 
-              MARGIN = 1,
-              function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional) * 100
-        
-
-        #hetPercent = rowSums(temp) / ncol(dataFunctional) * 100
-        cat("hetPercent", length(hetPercent), dim(hetPercent), "\n")
-        naCount = apply(dataFunctional, 
-                           MARGIN = 1,
-                           function(x) sum( (x %in% c("--")))) / ncol(dataFunctional) * 100
-        #naCount2 = rowSums(naCount) / ncol(dataFunctional) * 100
-        #cat("naCount2", length(naCount2), dim(naCount2), "\n")
-        #row = rownames(dataFunctional)
-        #cat("row", length(row), dim(row), "\n")
-        #hetCount = cbind(hetPercent, naCount2, rownames(dataFunctional))
-        #cat("hetCount", length(hetCount), dim(hetCount), "\n")
-        df <- data.frame("hetPercent" = hetPercent, "naCount" = naCount, "row" = rownames(dataFunctional))
-        #colnames(df[,3]) = "row"
-        #colnames(df)[3] = "row"
-        
-        ggplot(data = df, mapping = aes(x = hetPercent, y = row)) + 
-            geom_col(fill = 'royalblue4') +
-            #scale_y_continuous(labels = df::row(accuracy = 1)) +
-            labs(title = element_text("Het and NA percentatges Per Marker")) +
-            ylab("Percent of Individuals")
-    })
+    # output$markerHetBar <- renderPlot({
+    #     req(input$file1)
+    #     filename = function() {
+    #         file2 <- input$file1
+    #         ext <- tools::file_ext(file2$datapath)
+    #         paste(file2, "_JoinMapFile.loc", sep = "")
+    #     }
+    #     file <- input$file1
+    #     ext <- tools::file_ext(file$datapath)
+    #     
+    #     req(file)
+    #     validate(need(ext == "csv", "Please upload a csv file"))
+    #     data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+    #     rownames(data) = data[,1]
+    #     data = data[,c(2:ncol(data))]
+    #     data <- as.data.frame(data, check.names = FALSE)
+    #     
+    #     rownames(table) = table[,1]
+    #     #cat("table", dim(table), " \n")
+    #     table_s = table[rownames(table) %in% rownames(data),]
+    #     f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
+    #     dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
+    #     
+    #     hetPercent = apply(dataFunctional, 
+    #           MARGIN = 1,
+    #           function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional) * 100
+    #     
+    # 
+    #     #hetPercent = rowSums(temp) / ncol(dataFunctional) * 100
+    #     cat("hetPercent", length(hetPercent), dim(hetPercent), "\n")
+    #     naCount = apply(dataFunctional, 
+    #                        MARGIN = 1,
+    #                        function(x) sum( (x %in% c("--")))) / ncol(dataFunctional) * 100
+    #     #naCount2 = rowSums(naCount) / ncol(dataFunctional) * 100
+    #     #cat("naCount2", length(naCount2), dim(naCount2), "\n")
+    #     #row = rownames(dataFunctional)
+    #     #cat("row", length(row), dim(row), "\n")
+    #     #hetCount = cbind(hetPercent, naCount2, rownames(dataFunctional))
+    #     #cat("hetCount", length(hetCount), dim(hetCount), "\n")
+    #     df <- data.frame("hetPercent" = hetPercent, "naCount" = naCount, "row" = rownames(dataFunctional))
+    #     #colnames(df[,3]) = "row"
+    #     #colnames(df)[3] = "row"
+    #     
+    #     df.m <- melt(df, id.vars='row')
+    #     ggplot(data = df.m, mapping = aes(row, value)) +
+    #         geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+    #         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    #         labs(title = element_text("Het and NA percentatges Per Marker")) +
+    #         ylab("Percent of Marker") + xlab("") +
+    #         coord_flip()
+    # })
     output$markerIndBar <- renderPlot({
         req(input$file1)
         filename = function() {
@@ -339,14 +350,14 @@ server <- function(input, output) {
         
         hetPercent = apply(dataFunctional, 
                            MARGIN = 2,
-                           function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional) * 100
+                           function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / nrow(dataFunctional) * 100
         
         
         #hetPercent = rowSums(temp) / ncol(dataFunctional) * 100
         cat("hetPercent", length(hetPercent), dim(hetPercent), "\n")
         naCount = apply(dataFunctional, 
                         MARGIN = 2,
-                        function(x) sum( (x %in% c("--")))) / ncol(dataFunctional) * 100
+                        function(x) sum( (x %in% c("--")))) / nrow(dataFunctional) * 100
         #naCount2 = rowSums(naCount) / ncol(dataFunctional) * 100
         #cat("naCount2", length(naCount2), dim(naCount2), "\n")
         #row = rownames(dataFunctional)
@@ -357,11 +368,14 @@ server <- function(input, output) {
         #colnames(df[,3]) = "row"
         #colnames(df)[3] = "row"
         
-        ggplot(data = df, mapping = aes(x = hetPercent, y = column)) + 
-            geom_col(fill = 'royalblue4') +
-            #scale_y_continuous(labels = df::row(accuracy = 1)) +
-            labs(title = element_text("Het and NA percentatges Per Marker")) +
-            ylab("Percent of Individuals")
+        df.m <- melt(df, id.vars='column')
+        ggplot(data = df.m, mapping = aes(column, value)) +
+            geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+            theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+            labs(title = element_text("Het and NA percentatges Per Sample")) +
+            ylab("Percent of Individuals") + xlab("") +
+            coord_flip()
+        
     })
 }
 
