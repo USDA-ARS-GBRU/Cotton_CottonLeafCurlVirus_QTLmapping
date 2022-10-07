@@ -14,6 +14,7 @@
 library(shiny)
 library(dplyr)
 library(stringr)
+library(ggplot2)
 table = read.csv("TableS1 - Sheet1.csv")
 
 # Define UI for application that draws a histogram
@@ -25,6 +26,11 @@ ui <- fluidPage(
                         c("F2" = "F2",
                           "F3" = "F3",
                           "F4" = "F4")),
+            textInput("hetLevel", 
+                      label = "Please give the heterozygousity Level", 
+                      value = "", 
+                      width = "100%",
+                      placeholder = "0.05"),
             textInput("parentAInput", 
                       label = "Please give the name of one of the parents in the cross", 
                       value = "", 
@@ -37,11 +43,12 @@ ui <- fluidPage(
                       placeholder = "Parent B"),
             actionButton(inputId = "submit", label = "Submit"),
             # Button
-            downloadButton("downloadData", "Download")
+            downloadButton("downloadData", "Download JoinMap Loc File")
             
         ),
         mainPanel(
-            plotOutput("markerHetBar")
+            plotOutput("markerHetBar"),
+            plotOutput("markerIndBar")
         )
     )
 )
@@ -51,38 +58,6 @@ server <- function(input, output) {
     #output$value1 <- reactive({ input$parentAInput })
     #output$value2 <- reactive({ input$parentBInput })
     #output$value3 <- reactive({ input$variable })
-    #dafault_val <- 0.05
-    
-    #observe({
-    #    if (!is.numeric(input$hetLevel)) {
-    #        updateNumericInput(session, "hetLevel", value = dafault_val)
-    #    }
-    #})
-    dataFunctional <- reactive({
-        req(input$file1)
-        filename = function() {
-            file2 <- input$file1
-            ext <- tools::file_ext(file2$datapath)
-            paste(file2, "_JoinMapFile.loc", sep = "")
-        }
-        data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
-        rownames(data) = data[,1]
-        data = data[,c(2:ncol(data))]
-        data <- as.data.frame(data, check.names = FALSE)
-        #cat("data", dim(data), " \n")
-        #cat(typeof(data), "\n")
-        #print(head(data), "\n")
-        #print(colnames(data), "\n")
-        #table = read.csv("TableS1 - Sheet1.csv")
-        rownames(table) = table[,1]
-        #cat("table", dim(table), " \n")
-        table_s = table[rownames(table) %in% rownames(data),]
-        f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
-        dataFunc = data[rownames(data) %in% rownames(f2_poly),]
-        #cat("dataFunctional", dim(dataFunctional), " \n")
-        #cat("f2_poly", dim(f2_poly), " \n")
-        return(dataFunc)
-    })
     observeEvent( input$submit, {
         file <- input$file1
         ext <- tools::file_ext(file$datapath)
@@ -113,7 +88,11 @@ server <- function(input, output) {
     
     
     output$downloadData <- downloadHandler(
-        req(dataFunctional()),
+        filename = function() {
+            file2 <- input$file1
+            ext <- tools::file_ext(file2$datapath)
+            paste(file2, "_JoinMapFile.loc", sep = "")
+        },
         content = function(filename) {
             #this function will create a JoinMap file with the F2 format from the variables given
             makeJoinMapF2File <- function(outFile, population.recast)
@@ -201,40 +180,40 @@ server <- function(input, output) {
                 return(population.recast)
             }
             
-            #file <- input$file1
-            #ext <- tools::file_ext(file$datapath)
+            file <- input$file1
+            ext <- tools::file_ext(file$datapath)
             
-            #req(file)
-            #validate(need(ext == "csv", "Please upload a csv file"))
-            #cat("enter program \n")
-            ##read.csv(file$datapath, skip = 9, check.names = FALSE)
-            #data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
-            #rownames(data) = data[,1]
-            #data = data[,c(2:ncol(data))]
-            #data <- as.data.frame(data, check.names = FALSE)
-            #cat("data", dim(data), " \n")
-            #cat(typeof(data), "\n")
-            ##print(head(data), "\n")
-            ##print(colnames(data), "\n")
-            ##table = read.csv("TableS1 - Sheet1.csv")
-            #rownames(table) = table[,1]
-            #cat("table", dim(table), " \n")
-            #table_s = table[rownames(table) %in% rownames(data),]
-            #f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
-            #dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
-            #cat("dataFunctional", dim(dataFunctional), " \n")
-            #cat("f2_poly", dim(f2_poly), " \n")
+            req(file)
+            validate(need(ext == "csv", "Please upload a csv file"))
+            cat("enter program \n")
+            #read.csv(file$datapath, skip = 9, check.names = FALSE)
+            data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+            rownames(data) = data[,1]
+            data = data[,c(2:ncol(data))]
+            data <- as.data.frame(data, check.names = FALSE)
+            cat("data", dim(data), " \n")
+            cat(typeof(data), "\n")
+            #print(head(data), "\n")
+            #print(colnames(data), "\n")
+            #table = read.csv("TableS1 - Sheet1.csv")
+            rownames(table) = table[,1]
+            cat("table", dim(table), " \n")
+            table_s = table[rownames(table) %in% rownames(data),]
+            f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
+            dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
+            cat("dataFunctional", dim(dataFunctional), " \n")
+            cat("f2_poly", dim(f2_poly), " \n")
             
             #*********
             #get parent A and parent B from user input
-            parentA <- dataFunctional()[ , input$parentAInput, drop = FALSE]
+            parentA <- dataFunctional[ , input$parentAInput, drop = FALSE]
             cat(input$parentAInput, "\n")
             cat("parentA", dim(parentA), "\n")
-            parentB <- dataFunctional()[ , input$parentBInput, drop = FALSE]
+            parentB <- dataFunctional[ , input$parentBInput, drop = FALSE]
             cat("parentB", dim(parentB), "\n")
             #separate into different arrays
             #remove from f2 population array
-            dataNoParents <- dataFunctional()[ , -which(names(dataFunctional()) %in% c(input$parentAInput,input$parentBInput))]
+            dataNoParents <- dataFunctional[ , -which(names(dataFunctional) %in% c(input$parentAInput,input$parentBInput))]
             cat(dim(dataNoParents), "\n")
             #need to drop down to functional markers
             #****
@@ -261,23 +240,10 @@ server <- function(input, output) {
             parentB_reduced = parentB[temp,, drop=FALSE]
             cat("parentB_reduced", dim(parentB_reduced), "\n")
             #now get het of population
-            temp = c(1:ncol(f2_reduced))
-            cat("temp", dim(temp), "\n")
+            hetPercent = apply(f2_reduced, 
+                               MARGIN = 1,
+                               function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional)
             
-            for(i in 1:nrow(f2_reduced)){
-                for (j in 1:ncol(f2_reduced)){
-                    tmp = c(1:ncol(f2_reduced))
-                    if((f2_reduced[i,j] != "AA") && (f2_reduced[i,j] != "TT") && (f2_reduced[i,j] != "CC") && (f2_reduced[i,j] != "GG") && (f2_reduced[i,j] != "--")){
-                        tmp[j] = 1
-                    } else{
-                        tmp[j] = 0}
-                }
-                temp = rbind(temp,tmp)
-            }
-            #remove that temporary holder row
-            temp = temp[-1,]
-            cat("temp", dim(temp), "\n")
-            hetPercent = rowSums(temp) / ncol(f2_reduced)
             cat("hetPercent", dim(hetPercent), "\n")
             
             if (hetPercent[1] >= 0.05){temp = TRUE
@@ -300,71 +266,103 @@ server <- function(input, output) {
         }
     )
     output$markerHetBar <- renderPlot({
-        #req(input$file1)
-        #filename = function() {
-        #    file2 <- input$file1
-        #    ext <- tools::file_ext(file2$datapath)
-        #    paste(file2, "_JoinMapFile.loc", sep = "")
-        #}
+        req(input$file1)
+        filename = function() {
+            file2 <- input$file1
+            ext <- tools::file_ext(file2$datapath)
+            paste(file2, "_JoinMapFile.loc", sep = "")
+        }
+        file <- input$file1
+        ext <- tools::file_ext(file$datapath)
         
-        #req(input$file1)
+        req(file)
+        validate(need(ext == "csv", "Please upload a csv file"))
+        data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        rownames(data) = data[,1]
+        data = data[,c(2:ncol(data))]
+        data <- as.data.frame(data, check.names = FALSE)
         
-        #data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
-        #rownames(data) = data[,1]
-        #data = data[,c(2:ncol(data))]
-        #data <- as.data.frame(data, check.names = FALSE)
-        
-        #rownames(table) = table[,1]
+        rownames(table) = table[,1]
         #cat("table", dim(table), " \n")
-        #table_s = table[rownames(table) %in% rownames(data),]
-        #f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
-        #dataFunctional() = data[rownames(data) %in% rownames(f2_poly),]
+        table_s = table[rownames(table) %in% rownames(data),]
+        f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
+        dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
         
-        #temp = c(1:ncol(dataFunctional()))
-        #cat("temp", dim(temp), "\n")
+        hetPercent = apply(dataFunctional, 
+              MARGIN = 1,
+              function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional) * 100
         
-        #for(i in 1:nrow(dataFunctional())){
-        #    for (j in 1:ncol(dataFunctional())){
-        #        tmp = c(1:ncol(dataFunctional()))
-        #        if((dataFunctional()[i,j] != "AA") && (dataFunctional()[i,j] != "TT") && (dataFunctional()[i,j] != "CC") && (dataFunctional()[i,j] != "GG") && (dataFunctional()[i,j] != "--")){
-        #            tmp[j] = 1
-        #        } else{
-        #            tmp[j] = 0}
-        #    }
-        #    temp = rbind(temp,tmp)
-        #}
-        #remove that temporary holder row
-        #temp = temp[-1,]
-        #EhetPercent = rowSums(temp) / ncol(dataFunctional()) * 100
+
+        #hetPercent = rowSums(temp) / ncol(dataFunctional) * 100
+        cat("hetPercent", length(hetPercent), dim(hetPercent), "\n")
+        naCount = apply(dataFunctional, 
+                           MARGIN = 1,
+                           function(x) sum( (x %in% c("--")))) / ncol(dataFunctional) * 100
+        #naCount2 = rowSums(naCount) / ncol(dataFunctional) * 100
+        #cat("naCount2", length(naCount2), dim(naCount2), "\n")
+        #row = rownames(dataFunctional)
+        #cat("row", length(row), dim(row), "\n")
+        #hetCount = cbind(hetPercent, naCount2, rownames(dataFunctional))
+        #cat("hetCount", length(hetCount), dim(hetCount), "\n")
+        df <- data.frame("hetPercent" = hetPercent, "naCount" = naCount, "row" = rownames(dataFunctional))
+        #colnames(df[,3]) = "row"
+        #colnames(df)[3] = "row"
         
-        #naCount = str_count(dataFunctional()[1,], pattern = "--") / ncol(dataFunctional()) * 100
-        #for(i in 2:nrow(dataFunctional())){
-        #    tmp = str_count(dataFunctional()[i,], pattern = "--")
-        #    naCount = rbind(naCount, tmp) / ncol(dataFunctional()) * 100
-        #}
-        #row = rownames(dataFunctional())
-        #df <- data.frame(row,hetPercent,naCount)
-        #x    <- faithful[, 2]
-        #bins <- seq(min(x), max(x), length.out = input$bins + 1)
+        ggplot(data = df, mapping = aes(x = hetPercent, y = row)) + 
+            geom_col(fill = 'royalblue4') +
+            #scale_y_continuous(labels = df::row(accuracy = 1)) +
+            labs(title = element_text("Het and NA percentatges Per Marker")) +
+            ylab("Percent of Individuals")
+    })
+    output$markerIndBar <- renderPlot({
+        req(input$file1)
+        filename = function() {
+            file2 <- input$file1
+            ext <- tools::file_ext(file2$datapath)
+            paste(file2, "_JoinMapFile.loc", sep = "")
+        }
+        file <- input$file1
+        ext <- tools::file_ext(file$datapath)
         
-        # draw the histogram with the specified number of bins
-        #hist(x, breaks = bins, col = 'darkgray', border = 'white')
-        #ggplot(df, aes(x = hetPercent, y = row)) + 
-        #    geom_col(fill = 'royalblue4') +
-        #    scale_y_continuous(labels = df::row(accuracy = 1)) +
-        #    labs(title = element_text("Het and NA percentatges Per Marker")) +
-        #    ylab("Percent of Individuals")
+        req(file)
+        validate(need(ext == "csv", "Please upload a csv file"))
+        data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        rownames(data) = data[,1]
+        data = data[,c(2:ncol(data))]
+        data <- as.data.frame(data, check.names = FALSE)
+        
+        rownames(table) = table[,1]
+        #cat("table", dim(table), " \n")
+        table_s = table[rownames(table) %in% rownames(data),]
+        f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
+        dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
+        
+        hetPercent = apply(dataFunctional, 
+                           MARGIN = 2,
+                           function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional) * 100
+        
+        
+        #hetPercent = rowSums(temp) / ncol(dataFunctional) * 100
+        cat("hetPercent", length(hetPercent), dim(hetPercent), "\n")
+        naCount = apply(dataFunctional, 
+                        MARGIN = 2,
+                        function(x) sum( (x %in% c("--")))) / ncol(dataFunctional) * 100
+        #naCount2 = rowSums(naCount) / ncol(dataFunctional) * 100
+        #cat("naCount2", length(naCount2), dim(naCount2), "\n")
+        #row = rownames(dataFunctional)
+        #cat("row", length(row), dim(row), "\n")
+        #hetCount = cbind(hetPercent, naCount2, rownames(dataFunctional))
+        #cat("hetCount", length(hetCount), dim(hetCount), "\n")
+        df <- data.frame("hetPercent" = hetPercent, "naCount" = naCount, "column" = colnames(dataFunctional))
+        #colnames(df[,3]) = "row"
+        #colnames(df)[3] = "row"
+        
+        ggplot(data = df, mapping = aes(x = hetPercent, y = column)) + 
+            geom_col(fill = 'royalblue4') +
+            #scale_y_continuous(labels = df::row(accuracy = 1)) +
+            labs(title = element_text("Het and NA percentatges Per Marker")) +
+            ylab("Percent of Individuals")
     })
 }
 
 shinyApp(ui, server)
-        
-#        for (j in 1:ncol(dataFunctional)){ cat(j)
-#    tmp = c(1:ncol(dataFunctional))
-#    if((dataFunctional[1,j] != "AA") && (dataFunctional[1,j] != "TT") && (dataFunctional[1,j] != "CC") && (dataFunctional[1,j] != "GG") && (dataFunctional[1,j] != "--")){
-#        cat(j, "if \n")
-#		tmp[j] = 1
-#    } else{
-#cat(j, "else \n")
-#        tmp[j] = 0}
-#}
