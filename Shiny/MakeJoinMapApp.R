@@ -106,7 +106,7 @@ server <- function(input, output, session) {
         
     })
     
-    
+     
     output$downloadData <- downloadHandler(
         filename = function() {
             file2 <- input$file1
