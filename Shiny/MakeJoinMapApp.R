@@ -65,18 +65,19 @@ server <- function(input, output, session) {
     #output$value2 <- reactive({ input$parentBInput })
     #output$value3 <- reactive({ input$variable })
     dafault_val <- 0.05
-    
     observe({
         if (!is.numeric(input$hetLevel)) {
             updateNumericInput(session, "hetLevel", value = dafault_val)
         }
     })
     
-    observeEvent( input$submit, {
+    
+    data = reactive({
+        req(input$file1)
         file <- input$file1
         ext <- tools::file_ext(file$datapath)
         
-        req(file)
+        #req(file)
         #validate(need(ext == "csv", "Please upload a csv file"))
         
         #read.csv(file$datapath, skip = 9, check.names = FALSE)
@@ -103,10 +104,10 @@ server <- function(input, output, session) {
                 stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
             }
         }
-        
+        return(data)
     })
     
-     
+    
     output$downloadData <- downloadHandler(
         filename = function() {
             file2 <- input$file1
@@ -352,27 +353,28 @@ server <- function(input, output, session) {
     #         coord_flip()
     # })
     output$markerIndBar <- renderPlot({
-        file <- input$file1
-        ext <- tools::file_ext(file$datapath)
+        #file <- input$file1
+        #ext <- tools::file_ext(file$datapath)
         
-        req(file)
-        if (tolower(tools::file_ext(file$datapath)) == "csv")
-        {
-            data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
-        } else
-        {
-            data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
-        }
+        req(input$file1)
+        #if (tolower(tools::file_ext(file$datapath)) == "csv")
+        #{
+        #    data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+        #} else
+        #{
+        #    data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
+        #}
         #data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
-        rownames(data) = data[,1]
-        data = data[,c(2:ncol(data))]
-        data <- as.data.frame(data, check.names = FALSE)
+        #rownames(data) = data[,1]
+        #data = data[,c(2:ncol(data))]
+        req(data())
+        data1 <- as.data.frame(data(), check.names = FALSE)
         
         rownames(table) = table[,1]
         #cat("table", dim(table), " \n")
-        table_s = table[rownames(table) %in% rownames(data),]
-        f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
-        dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
+        table_s = table[rownames(table) %in% rownames(data1),]
+        f2_poly = data1[table_s[,5]=="FunctionalPolymorphic",]
+        dataFunctional = data1[rownames(data1) %in% rownames(f2_poly),]
         
         hetPercent = apply(dataFunctional, 
                            MARGIN = 2,
