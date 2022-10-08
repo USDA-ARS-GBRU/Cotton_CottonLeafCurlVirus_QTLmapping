@@ -25,6 +25,9 @@ ui <- fluidPage(
             fileInput("file1", "Choose txt/CSV File", accept = c("text/csv", 
                                                                  "text/comma-separated-values,text/plain",
                                                                  ".csv", ".txt")),
+            fileInput("file3", "Optional: Choose txt file containing list of sample names", accept = c("text/csv", 
+                                                                                                       "text/comma-separated-values,text/plain",
+                                                                                                       ".csv", ".txt")),
             selectInput("variable", "Select the Population Type:",
                         c("F2" = "F2",
                           "F3" = "F3",
@@ -85,9 +88,9 @@ server <- function(input, output, session) {
             data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
         }
         #set the row names to be the 1st column
-        #rownames(data) <- data[,1]
+        rownames(data) <- data[,1]
         #remove 1st column
-        #data <- data[,-1]
+        data <- data[,-1]
         
         #check the format of the Final Report file
         #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
@@ -214,8 +217,16 @@ server <- function(input, output, session) {
             rownames(data) = data[,1]
             data = data[,c(2:ncol(data))]
             data <- as.data.frame(data, check.names = FALSE)
+            
+            
             cat("data", dim(data), " \n")
             cat(typeof(data), "\n")
+            cat(input$file3[[1]], "\n")
+            #if(!is.null(input$file3))
+            #{
+            #    name.list <- read.delim(input$file3, header = FALSE)
+            #    data <- data[,colnames(data) %in% name.list]
+            #}
             #print(head(data), "\n")
             #print(colnames(data), "\n")
             #table = read.csv("TableS1 - Sheet1.csv")
