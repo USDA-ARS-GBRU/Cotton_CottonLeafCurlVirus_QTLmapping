@@ -22,7 +22,7 @@ table = read.csv("TableS1 - Sheet1.csv")
 ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
-            fileInput("file1", "Choose txt/CSV File", accept = c("text/csv", 
+            fileInput("file1", "Choose txt/CSV File", multiple = TRUE, accept = c("text/csv", 
                                                                  "text/comma-separated-values,text/plain",
                                                                  ".csv", ".txt")),
             fileInput("file3", "Optional: Choose txt file containing list of sample names", accept = c("text/csv", 
@@ -73,26 +73,41 @@ server <- function(input, output, session) {
     
     
     data = reactive({
-        req(input$file1)
-        file <- input$file1
-        ext <- tools::file_ext(file$datapath)
-        
+        #req(input$file1[[]])
         #req(file)
         #validate(need(ext == "csv", "Please upload a csv file"))
         
         #read.csv(file$datapath, skip = 9, check.names = FALSE)
-        if (tolower(tools::file_ext(file$datapath)) == "csv")
+        if (tolower(tools::file_ext(input$file1[[1, 'datapath']])) == "csv")
         {
-            data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+            data <- read.csv(input$file1[[1, 'datapath']], skip = 9, check.names = FALSE)
         } else
         {
-            data <- read.delim(file$datapath, skip = 9, check.names = FALSE)
+            data <- read.delim(input$file1[[1, 'datapath']], skip = 9, check.names = FALSE)
         }
+        if(nrow(input$file1) > 1){
+            for(i in 2:length(input$file1[,1])){
+                cat(input$file1[i,1], "\n")
+                #file <- input$file1[i,1]
+                #cat(file, "\n")
+                cat(input$file1[[1, 'datapath']], "\n")
+                #ext <- tools::file_ext(file$datapath)
+                if (tolower(tools::file_ext(input$file1[[i, 'datapath']])) == "csv")
+                {
+                    tmp <- read.csv(input$file1[[i, 'datapath']], skip = 9, check.names = FALSE)
+                } else
+                {
+                    tmp <- read.delim(input$file1[[i, 'datapath']], skip = 9, check.names = FALSE)
+                }
+                cat(tmp[1,1], "\n")
+                tmp = as.data.frame(tmp)
+                data = cbind(data, tmp)
+        }}
         #set the row names to be the 1st column
         rownames(data) <- data[,1]
         #remove 1st column
         data <- data[,-1]
-        
+        cat("data", dim(data), "\n")
         #check the format of the Final Report file
         #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
         #-- acceptable given these 1st 7 are functionalMonomorphic
@@ -114,12 +129,12 @@ server <- function(input, output, session) {
     
     output$downloadData <- downloadHandler(
         filename = function() {
-            file2 <- input$file1
+            file2 <- input$file1[1,1]
             ext <- tools::file_ext(file2$datapath)
             paste(file2, "_JoinMapFile.loc", sep = "")
         },
         content = function(filename) {
-            req(input$file1)
+            #req(input$file1[[]])
             req(data())
             #this function will create a JoinMap file with the F2 format from the variables given
             makeJoinMapF2File <- function(outFile, population.recast)
@@ -280,7 +295,7 @@ server <- function(input, output, session) {
         }
     )
     output$markerIndBar <- renderPlot({
-        req(input$file1)
+        #req(input$file1[[]])
         req(data())
         dataFunctional <- as.data.frame(data(), check.names = FALSE)
         
