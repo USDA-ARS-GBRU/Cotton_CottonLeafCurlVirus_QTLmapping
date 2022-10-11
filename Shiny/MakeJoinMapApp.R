@@ -47,7 +47,6 @@ ui <- fluidPage(
                       value = "", 
                       width = "100%",
                       placeholder = "Parent B"),
-            actionButton(inputId = "submit", label = "Submit"),
             # Button
             downloadButton("downloadData", "Download JoinMap Loc File")
             
@@ -107,7 +106,7 @@ server <- function(input, output, session) {
         rownames(data) <- data[,1]
         #remove 1st column
         data <- data[,-1]
-        cat("data", dim(data), "\n")
+        #cat("data", dim(data), "\n")
         #check the format of the Final Report file
         #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
         #-- acceptable given these 1st 7 are functionalMonomorphic
@@ -123,6 +122,15 @@ server <- function(input, output, session) {
         table_s = table[rownames(table) %in% rownames(data),]
         f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
         dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
+        if(!is.null(input$file3)==T){
+            #cat(input$file3[1,], !is.null(input$file3), "\n")
+            name.list <- read.delim(input$file3[[1, 'datapath']], header = FALSE)
+            cat(dim(name.list), "\n")
+            name.list <- base::t(name.list)
+            name.list <- base::t(name.list)
+            dataFunctional <- dataFunctional[,colnames(data) %in% name.list]
+            cat(dim(dataFunctional), "\n")
+        }
         return(dataFunctional)
     })
     
@@ -222,7 +230,7 @@ server <- function(input, output, session) {
                 return(population.recast)
             }
             
-            cat(input$file3[[1]], "\n")
+            #cat(input$file3[[1]], "\n")
             #if(!is.null(input$file3))
             #{
             #    name.list <- read.delim(input$file3, header = FALSE)
