@@ -20,40 +20,58 @@ table = read.csv("TableS1 - Sheet1.csv")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-    sidebarLayout(
-        sidebarPanel(
-            fileInput("file1", "Choose txt/CSV File", multiple = TRUE, accept = c("text/csv", 
-                                                                 "text/comma-separated-values,text/plain",
-                                                                 ".csv", ".txt")),
-            fileInput("file3", "Optional: Choose txt file containing list of sample names", accept = c("text/csv", 
-                                                                                                       "text/comma-separated-values,text/plain",
-                                                                                                       ".csv", ".txt")),
-            selectInput("variable", "Select the Population Type:",
-                        c("F2" = "F2",
-                          "F3" = "F3",
-                          "F4" = "F4")),
-            textInput("hetLevel", 
-                      label = "Please give the heterozygousity Level", 
-                      value = "", 
-                      width = "100%",
-                      placeholder = "0.05"),
-            textInput("parentAInput", 
-                      label = "Please give the name of one of the parents in the cross", 
-                      value = "", 
-                      width = "100%",
-                      placeholder = "Parent A"),
-            textInput("parentBInput", 
-                      label = "Please give the name of the other parent in the cross", 
-                      value = "", 
-                      width = "100%",
-                      placeholder = "Parent B"),
-            # Button
-            downloadButton("downloadData", "Download JoinMap Loc File")
-            
+    tabsetPanel(
+        tabPanel("JoinMap", fluid = TRUE,
+            sidebarLayout(
+                sidebarPanel(
+                    fileInput("file1", "Choose TXT/CSV Final Report File(s)", multiple = TRUE, accept = c("text/csv", 
+                                                                         "text/comma-separated-values,text/plain",
+                                                                         ".csv", ".txt")),
+                    fileInput("file3", "Optional: Choose TXT File Containing List of Sample Names", accept = c("text/csv", 
+                                                                                                               "text/comma-separated-values,text/plain",
+                                                                                                               ".csv", ".txt")),
+                    selectInput("variable", "Select the Population Type:",
+                                c("F2" = "F2",
+                                  "F3" = "F3",
+                                  "F4" = "F4")),
+                    textInput("hetLevel", 
+                              label = "Please give the Minimum Heterozygousity Level", 
+                              value = "", 
+                              width = "100%",
+                              placeholder = "0.05"),
+                    textInput("parentAInput", 
+                              label = "Please give the name of one of the parents in the cross as named in the Final Report", 
+                              value = "", 
+                              width = "100%",
+                              placeholder = "Parent A"),
+                    textInput("parentBInput", 
+                              label = "Please give the name of the other parent in the cross", 
+                              value = "", 
+                              width = "100%",
+                              placeholder = "Parent B"),
+                    # Button
+                    downloadButton("downloadData", "Download JoinMap Loc File"),
+                    downloadButton("downloadFunctional", "Download CSV of the Functional Polymorphic Markers of your project")
+                ),
+                mainPanel(
+                    #plotOutput("markerHetBar"),
+                    plotOutput("markerIndBar")
+                )
+            )
         ),
-        mainPanel(
-            #plotOutput("markerHetBar"),
-            plotOutput("markerIndBar")
+        tabPanel("IUPAC", fluid = TRUE,
+                 sidebarLayout(
+                     sidebarPanel(
+                         fileInput("file4", "Choose CSV File", accept = ".csv"),
+                         #actionButton(inputId = "submit", label = "Submit"),
+                         # Button
+                         downloadButton("downloadIUPAC", "Download")
+                         
+                     ),
+                     mainPanel(
+                         tableOutput("contents")
+                     )
+                 )
         )
     )
 )
@@ -72,7 +90,7 @@ server <- function(input, output, session) {
     
     
     data = reactive({
-        #req(input$file1[[]])
+        req(input$file1[1,1])
         #req(file)
         #validate(need(ext == "csv", "Please upload a csv file"))
         
@@ -106,7 +124,7 @@ server <- function(input, output, session) {
         rownames(data) <- data[,1]
         #remove 1st column
         data <- data[,-1]
-        #cat("data", dim(data), "\n")
+        cat("data", dim(data), "\n")
         #check the format of the Final Report file
         #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
         #-- acceptable given these 1st 7 are functionalMonomorphic
@@ -122,6 +140,7 @@ server <- function(input, output, session) {
         table_s = table[rownames(table) %in% rownames(data),]
         f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
         dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
+        cat("dataFunctional", dim(dataFunctional), "\n")
         if(!is.null(input$file3)==T){
             #cat(input$file3[1,], !is.null(input$file3), "\n")
             name.list <- read.delim(input$file3[[1, 'datapath']], header = FALSE)
@@ -138,11 +157,11 @@ server <- function(input, output, session) {
     output$downloadData <- downloadHandler(
         filename = function() {
             file2 <- input$file1[1,1]
-            ext <- tools::file_ext(file2$datapath)
+            #ext <- tools::file_ext(input$file1[[1, 'datapath']])
             paste(file2, "_JoinMapFile.loc", sep = "")
         },
         content = function(filename) {
-            #req(input$file1[[]])
+            req(input$file1[1,1])
             req(data())
             #this function will create a JoinMap file with the F2 format from the variables given
             makeJoinMapF2File <- function(outFile, population.recast)
@@ -302,8 +321,19 @@ server <- function(input, output, session) {
             makeJoinMapF2File(outFile = filename, population.recast = population.recast)
         }
     )
+    output$downloadFunctional <- downloadHandler(
+        filename = function() {
+            file2 <- input$file1[1,1]
+            #ext <- tools::file_ext(input$file1[[1, 'datapath']])
+            paste(file2, "_FunctionalPolymorphicMarkers.csv", sep = "")
+        },
+        content = function(filename) {
+            req(data())
+            write.csv(data(), filename, row.names = TRUE)
+        }
+    )
     output$markerIndBar <- renderPlot({
-        #req(input$file1[[]])
+        req(input$file1[1,1])
         req(data())
         dataFunctional <- as.data.frame(data(), check.names = FALSE)
         
@@ -327,6 +357,72 @@ server <- function(input, output, session) {
             coord_flip()
         
     })
+    dataIUPAC = reactive({
+        req(input$file4)
+        #req(file)
+        #validate(need(ext == "csv", "Please upload a csv file"))
+        
+        #read.csv(file$datapath, skip = 9, check.names = FALSE)
+        if (tolower(tools::file_ext(input$file4[[1, 'datapath']])) == "csv")
+        {
+            data <- read.csv(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
+        } else
+        {
+            data <- read.delim(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
+        }
+        for (i in ncol(data)){
+            if (isFALSE(data[1,i] == "TT" || data[1,i] == "--") && isFALSE(data[2,i] == "CC" || data[2,i] == "--") && isFALSE(data[3,i] == "TT" || data[3,i] == "--") && isFALSE(data[4,i] == "GG" || data[4,i] == "--") && isFALSE(data[5,i] == "AA" || data[5,i] == "--") && isFALSE(data[6,i] == "--") && isFALSE(data[7,i] == "TT" || data[7,i] == "--") && isFALSE(data[8,i] == "AC" || data[8,i] == "--"))
+                #if (isFALSE(t1) && isFALSE(t2) && isFALSE(t3) && isFALSE(t4) && isFALSE(t5) && isFALSE(t6) && isFALSE(t7) && isFALSE(t8))
+            {
+                #if the Report file is incorrect, throw an error and exit the script
+                stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+            }
+        }
+        return(data)
+    })
+    output$downloadIUPAC <- downloadHandler(
+        filename = function() {
+            file5 <- input$file4
+            #ext <- tools::file_ext(file2$datapath)
+            paste(file5, "_IUPAC.csv", sep = "")
+        },
+        content = function(filename) {
+            req(input$file4)
+            req(dataIUPAC())
+            #file <- input$file4
+            #ext <- tools::file_ext(file$datapath)
+            #validate(need(ext == "csv", "Please upload a csv file"))
+            
+            #read.csv(file$datapath, skip = 9, check.names = FALSE)
+            #data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
+            data = as.data.frame(dataIUPAC(), check.names = FALSE)
+            
+            #print("Making the new matrix.  This may take a few minutes.")
+            population.recast <- data
+            population.recast <- lapply(population.recast, function(x) {gsub("TT", "T", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("AA", "A", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("CC", "C", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("GG", "G", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("AG", "R", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("GA", "R", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("CT", "Y", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("TC", "Y", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("GT", "K", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("TG", "K", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("AC", "M", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("CA", "M", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("GC", "S", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("CG", "S", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("TA", "W", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("AT", "W", x)})
+            population.recast <- lapply(population.recast, function(x) {gsub("--", "-", x)})
+            temp <- as.data.frame(matrix(unlist(population.recast), nrow=length(unlist(population.recast[1]))))
+            population.recast <- temp
+            rownames(population.recast) <- rownames(data)
+            colnames(population.recast) <- colnames(data)
+            write.csv(population.recast, filename, row.names = FALSE)
+        }
+    )
 }
 
 shinyApp(ui, server)
