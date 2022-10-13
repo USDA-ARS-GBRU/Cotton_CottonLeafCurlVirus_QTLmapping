@@ -352,8 +352,9 @@ server <- function(input, output, session) {
         ggplot(data = df.m, mapping = aes(column, value)) +
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
             theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-            labs(title = element_text("Het and NA percentatges Per Sample")) +
-            ylab("Percent of Individuals") + xlab("") +
+            labs(title = element_text("Percentatges Per Sample")) +
+            ylab("Sample Name") + xlab("") +
+            ggtitle("Percentage of Heterzygous and N/A Markers per Sample") +
             coord_flip()
         
     })
