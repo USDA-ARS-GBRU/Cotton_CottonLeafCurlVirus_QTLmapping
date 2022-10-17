@@ -16,22 +16,28 @@ You do not need to change anything in this script.  Simply follow the prompts in
 
 To run in R console:
 	
-	Open the file in the console and click source
+&nbsp;&nbsp;&nbsp;Open the file in the console and click source
 
 To run in command line:
 	
-	source("makeIUPACformatFile.R")
-	or
-	chmod +x makeIUPACformatFile.R
-	./makeIUPACformatFile.R
+&nbsp;&nbsp;&nbsp;source("makeIUPACformatFile.R")
+&nbsp;&nbsp;&nbsp;or
+&nbsp;&nbsp;&nbsp;chmod +x makeIUPACformatFile.R
+&nbsp;&nbsp;&nbsp;./makeIUPACformatFile.R
 2.	The script will first prompt you to enter in the path to your current path directory
  
 ![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/IUPACFormat/IUPicture1.png?raw=true)
  
 3.	The script will then ask you to enter 1 if the final report file is a .csv file (comma delimited excel file) or 2 if the final report was printed to a text, .txt, file format.
-4.	At the next prompt, type in the name of the final report file.  Please include the file extension in the name (.csv or .txt) or the script will throw an error.   
+4.	At the next prompt, type in the name of the final report file.  Please include the file extension in the name (.csv or .txt) or the script will throw an error. 
+
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/IUPACFormat/IUPicture2.png?raw=true)
+
 5.	If the final report file is not in the correct format according to the instructions in the protocol TAMU CottonSNP63K Array https://www.cottongen.org/data/community_projects/tamu63k , the script will throw an error and quit.
 6.	If the final report was in the correct format, the script will let you know that it is working.  Then it will prompt you to name the new file.  The script will output the IUPAC formatted final report to this new file.  Please include the file extension name (.csv only) or the script will throw an error and require you to start over.
+
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/IUPACFormat/IUPicture3.png?raw=true)
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/IUPACFormat/IUPicture4.png?raw=true)
  
  
 Example final IUPAC .csv file.  (Numbers as the name are just the placeholder for this example)
