@@ -1,23 +1,23 @@
-#Script Tutorial
+#findF2DataFromFinalReportDocument.R Tutorial
 
-##About
+About
 This script will take in a Final Report file from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k and a text file of individual names, to produce a subset Final Report file with only individuals specified in a file.
 
 The script will find the columns in the Final Report file containing information from the individuals and output them to a new .csv file.
 
 The script will give you the option to convert the Final Report file into IUPAC format and export to a .csv file to facilitate upload into CottonGen.org.
 
-##Formatting Your Data
+Formatting Your Data
 findF2DataFromFinalReportDocument.R assumes your Final Report follows the above protocol listed on CottonGen’s website.  It can handle the report in either a text or csv file type.  I recommend you rename your Final Report file name to not include any spaces.
 
 findF2DataFromFinalReportDocument.R will also require another file in addition to the Final Report.  This file will be a list of the samples you wish to find in the Final Report.  Please create this list as text file with 1 sample name per line.  Again, I recommend not including any spaces in the name of this file as well.  You do not need a header. 
 
 
 
-##Modifying the Script
+Modifying the Script
 You do not need to change anything in this script.  Simply follow the prompts in the console.
 
-##Tutorial
+Tutorial
 1.	Start the script: 
 To run in R console:
 	Open the file in the console and click source
@@ -38,12 +38,12 @@ To run in command line:
 9.	The script will then give you the option to convert the Final Report to IUPAC format.  
 10.	At the next prompt, input a name for the IUPAC .csv file.
 
-######Citations
+Citations
 If you use these tools please cite Schoonmaker, Ashley (2019). findF2DataFromFinalReportDocument.R (Version 1.0) [Source code]. https://www.cottongen.org/data/community_projects/tamu63k
 
-######Meaning of Errors
-“You have entered an invalid key.  Please try again.”
+Meaning of Errors
+	“You have entered an invalid key.  Please try again.”
 		This error will appear after either the yes/no questions or after asking if the file is txt or csv.  This error indicates you have entered something other than a variation of yes or no for the first and something other than 1 or 2 for the latter.  
-		
-“Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k”
+	“Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k”
 		This error indicates that your Final Report File does not following the protocol listed on the above website.  Please refer to the website for instructions on how to print your data from GenomeStudio.
+
