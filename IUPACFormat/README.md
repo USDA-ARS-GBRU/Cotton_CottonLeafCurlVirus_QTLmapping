@@ -13,14 +13,20 @@ You do not need to change anything in this script.  Simply follow the prompts in
 
 ## Tutorial
 1.	Start the script:
+
 To run in R console:
+	
 	Open the file in the console and click source
+
 To run in command line:
+	
 	source("makeIUPACformatFile.R")
 	or
 	chmod +x makeIUPACformatFile.R
 	./makeIUPACformatFile.R
 2.	The script will first prompt you to enter in the path to your current path directory
+ 
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/IUPACFormat/IUPicture1.png?raw=true)
  
 3.	The script will then ask you to enter 1 if the final report file is a .csv file (comma delimited excel file) or 2 if the final report was printed to a text, .txt, file format.
 4.	At the next prompt, type in the name of the final report file.  Please include the file extension in the name (.csv or .txt) or the script will throw an error.   
