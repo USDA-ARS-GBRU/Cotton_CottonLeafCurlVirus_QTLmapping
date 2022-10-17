@@ -7,15 +7,13 @@ The script will find the columns in the Final Report file containing information
 
 The script will give you the option to convert the Final Report file into IUPAC format and export to a .csv file to facilitate upload into CottonGen.org.
 
-## Formatting Your Data
+#### Modifying the Script
+You do not need to change anything in this script.  Simply follow the prompts in the console.
+
+### Formatting Your Data
 findF2DataFromFinalReportDocument.R assumes your Final Report follows the above protocol listed on CottonGen’s website.  It can handle the report in either a text or csv file type.  I recommend you rename your Final Report file name to not include any spaces.
 
 findF2DataFromFinalReportDocument.R will also require another file in addition to the Final Report.  This file will be a list of the samples you wish to find in the Final Report.  Please create this list as text file with 1 sample name per line.  Again, I recommend not including any spaces in the name of this file as well.  You do not need a header. 
-
-
-
-## Modifying the Script
-You do not need to change anything in this script.  Simply follow the prompts in the console.
 
 ## Tutorial
 1.	Start the script: 
