@@ -1,4 +1,4 @@
-#findF2DataFromFinalReportDocument.R Tutorial
+#Script Tutorial
 
 ##About
 This script will take in a Final Report file from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k and a text file of individual names, to produce a subset Final Report file with only individuals specified in a file.
