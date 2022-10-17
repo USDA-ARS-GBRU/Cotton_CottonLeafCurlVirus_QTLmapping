@@ -5,13 +5,13 @@ This script will take in a Final Report file from Illumina's Genome Studio expor
 
 The script will convert then Final Report file into IUPAC format and export to a .csv file to facilitate upload into CottonGen.org.
 
-Formatting Your Data
+## Formatting Your Data
 makeIUPACformatFile.R assumes your Final Report follows the above protocol listed on CottonGen’s website.  It can handle the report in either a text or csv file.  I recommend you rename your final report file name to not include any spaces.
 
-Modifying the Script
+## Modifying the Script
 You do not need to change anything in this script.  Simply follow the prompts in the console.
 
-Tutorial
+## Tutorial
 1.	Start the script:
 To run in R console:
 	Open the file in the console and click source
@@ -30,10 +30,10 @@ To run in command line:
  
 Example final IUPAC .csv file.  (Numbers as the name are just the placeholder for this example)
 
-Citations
+### Citations
 If you use these tools please cite Schoonmaker, Ashley (2019). makeIUPACformatFile.R (Version 1.0) [Source code]. https://www.cottongen.org/data/community_projects/tamu63k
 
-Meaning of Errors
+### Meaning of Errors
 	“You have entered an invalid key.  Please try again.”
 		This error will appear after either the yes/no questions or after asking if the file is txt or csv.  This error indicates you have entered something other than a variation of yes or no for the first and something other than 1 or 2 for the latter.  
 	“Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k”
