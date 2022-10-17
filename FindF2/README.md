@@ -28,14 +28,29 @@ To run in command line:
 	./ findF2DataFromFinalReportDocument.R
 2.	The script will first prompt you to enter in the path to your current path directory
  
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture2.png?raw=true)
+ 
 3.	The script will then ask you to input the name of the text file that contains a list of the samples you wish to find in the Final Report file.  Please include the .txt extension in the name you give R
+  
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture3.png?raw=true)
  
 4.	The script will then ask you to enter 1 if the final report file is a .csv file (comma delimited excel file) or 2 if the final report was printed to a text, .txt, file format.
 5.	At the next prompt, type in the name of the final report file.  Please include the file extension in the name (.csv or .txt) or the script will throw an error.   
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture4.png?raw=true)
+
 6.	If the final report file is not in the correct format according to the instructions in the protocol TAMU CottonSNP63K Array https://www.cottongen.org/data/community_projects/tamu63k , the script will throw an error and quit.
 7.	If the final report was in the correct format, the script will let you know that it is working.  Then it will prompt you to name the new file.  The script will output the subset to the new file.  The script will then let you know that your data is now in the new file and the matrix is also stored in a variable in R that you can now manipulate.   
+
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture5.png?raw=true)
+
 8.	The script will then inform you if the Final Report is missing any of the samples from the list.  If will offer to subset the missing samples and print the new list to a new file.  
+
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture6.png?raw=true)
+
 9.	The script will then give you the option to convert the Final Report to IUPAC format.  
+
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture7.png?raw=true)
+
 10.	At the next prompt, input a name for the IUPAC .csv file.
 
 #### Citations
