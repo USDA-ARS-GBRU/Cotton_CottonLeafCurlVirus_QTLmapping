@@ -4,11 +4,13 @@ This project contains the R scripts use in the Cotton Leaf Curl Virus paper.  Th
 
 These are the scripts I developed for ease of use when analyzing multiple populations for QTLs.  For the anaylses in the paper, the R scripts were used for each of the populations.  I developed them this way because we did not have access to the actual parents of the crosses, only representatives of the line.  For this reason, I needed to look more closely at what markers I was filtering and for what reasons.  Later on, the scripts were condensed into a shiny app for use in future projects.
 
-For easier use, a shiny app was developed encasing each of these scripts.  Further notes are in the Shiny folder.
+For easier use, a shiny app was developed encasing each of these scripts. 
 
 **APP LINK**
 
-## Simple Way to Run Shiny App
+## Simple Steps to Run Shiny App
+
+Further notes are in the Shiny folder.
 
 ### Joinmap Tab
 
