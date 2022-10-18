@@ -8,9 +8,9 @@ For easier use, a shiny app was developed encasing each of these scripts.  Furth
 
 **APP LINK**
 
-##Simple Way to Run Shiny App
+## Simple Way to Run Shiny App
 
-###Joinmap Tab
+### Joinmap Tab
 
 Note:  This was written for cotton projects but this tab can be used for other QTL projects given the 2 parents are known.
 
@@ -24,7 +24,7 @@ Note:  This was written for cotton projects but this tab can be used for other Q
 4.  Download the .loc file by clicking the button.  A button is also available to download a csv file of the subsetted dataset with just the functional polymorphic markers for easy input into R to manipulate the data yourself.
 
 
-###IUPAC tab
+### IUPAC tab
 
 1. Upload **one** Final Report from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k in cvs or txt format
 
