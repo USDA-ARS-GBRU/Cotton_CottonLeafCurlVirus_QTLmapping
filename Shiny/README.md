@@ -9,11 +9,11 @@ Note:  This was written for cotton projects but this tab can be used for other Q
 
 1. Upload one or more Final Report from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k in cvs or txt format.  The Final Report should be in the same format as it was downloaded - the app expects the report to have the header.  The app will double check that the file is in the appropriate format.  If your file is not in the correct format, please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k
             
-            Optional: Upload a .txt list of the samples in the Final Report to subset the dataset if project encompasses less samples than what is in the Final Report
+**Optional:** Upload a .txt list of the samples in the Final Report to subset the dataset if project encompasses less samples than what is in the Final Report
 
-            ![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture1.png?raw=true)
+![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/FindF2/F2Picture1.png?raw=true)
             
-            The file should look like this.  The sample names should be exactly the same as they are listed in the Final Report.
+The file should look like this.  The sample names should be exactly the same as they are listed in the Final Report.
             
 2. Select the population type and the level of heterzygosity per marker to remove (default set to remove markers with less than 5% heterozygosity).  Population types include F2, F3, F4, and F5 which are what is listed in the header of the .loc file.  We recommend removing at least the markers with less than 5% heterozygosity.  
 
