@@ -14,8 +14,6 @@ Further notes are in the Shiny folder.
 
 ### Joinmap Tab
 
-Note:  This was written for cotton projects but this tab can be used for other QTL projects given the 2 parents are known.
-
 1. Upload one or more Final Report from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k in cvs or txt format
              Optional: Upload a .txt list of the samples in the Final Report to subset the dataset if project encompasses less samples than what is in the Final Report
 
