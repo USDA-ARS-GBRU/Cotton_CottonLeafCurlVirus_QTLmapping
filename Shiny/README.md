@@ -5,7 +5,6 @@
 
 ### Joinmap Tab
 
-Note:  This was written for cotton projects but this tab can be used for other QTL projects given the 2 parents are known.
 
 1. Upload one or more Final Report from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k in cvs or txt format.  The Final Report should be in the same format as it was downloaded - the app expects the report to have the header.  The app will double check that the file is in the appropriate format.  If your file is not in the correct format, please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k
             
