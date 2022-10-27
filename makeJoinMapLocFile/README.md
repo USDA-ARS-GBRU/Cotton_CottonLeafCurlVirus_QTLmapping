@@ -3,7 +3,7 @@
 This script will take the matrices of parent A, parent B, and the F2 data and convert to a JoinMap F2 .loc file.
 
 ## Formatting Your Data
-makeJoinMapFile.R assumes that you have already created variables that contain the polymorphic makers between the parents for the cross.  The three variables you will need will be the matrices of the markers for parent A, parent B and the F2 samples.  The rows should be the list of markers and the columns should be each of the samples.  Each of the matrices should have the same number of markers and the markers should be in the same order.
+makeJoinMapFile.R assumes that you have already read in the data that contain the polymorphic makers between the parents for the cross and separated the parents from the F2 data.  Data can be read in using the findF2 script.   The three variables you will need will be the matrices of the markers for parent A, parent B and the F2 samples.  The rows should be the list of markers and the columns should be each of the samples.  Each of the matrices should have the same number of markers and the markers should be in the same order.
 
 ![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/makeJoinMapLocFile/JMPicture1.png?raw=true)
 
