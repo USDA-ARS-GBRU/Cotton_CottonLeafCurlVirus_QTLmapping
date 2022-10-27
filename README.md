@@ -10,7 +10,7 @@ For easier use, a shiny app was developed encasing each of these scripts.
 
 ## Simple Steps to Run Shiny App
 
-Further notes are in the Shiny folder.
+[Further notes](https://github.com/USDA-ARS-GBRU/Cotton_CottonLeafCurlVirus_QTLmapping/tree/main/Shiny) are in the Shiny folder.
 
 ### Joinmap Tab
 
