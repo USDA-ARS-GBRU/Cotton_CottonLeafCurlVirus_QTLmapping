@@ -25,37 +25,33 @@ ui <- fluidPage(
             sidebarLayout(
                 sidebarPanel(
                     fileInput("file1", "Choose TXT/CSV Final Report File(s)", multiple = TRUE, accept = c("text/csv", 
-                                                                         "text/comma-separated-values,text/plain",
-                                                                         ".csv", ".txt")),
+                                "text/comma-separated-values,text/plain",
+                                ".csv", ".txt")),
                     fileInput("file3", "Optional: Choose TXT File Containing List of Sample Names", accept = c("text/csv", 
-                                                                                                               "text/comma-separated-values,text/plain",
-                                                                                                               ".csv", ".txt")),
+                                "text/comma-separated-values,text/plain",
+                                ".csv", ".txt")),
                     selectInput("variable", "Select the Population Type:",
                                 c("F2" = "F2",
                                   "F3" = "F3",
                                   "F4" = "F4")),
                     textInput("hetLevel", 
-                              label = "Please give the Minimum Heterozygousity Level", 
+                              label = "Please give the Minimum Heterozygousity Level in decimal (ex: 5% is 0.05)", 
                               value = "", 
                               width = "100%",
                               placeholder = "0.05"),
-                    textInput("parentAInput", 
-                              label = "Please give the name of one of the parents in the cross as named in the Final Report", 
-                              value = "", 
-                              width = "100%",
-                              placeholder = "Parent A"),
-                    textInput("parentBInput", 
-                              label = "Please give the name of the other parent in the cross", 
-                              value = "", 
-                              width = "100%",
-                              placeholder = "Parent B"),
+                    selectInput(inputId = "parentAInput", 
+                                label = "Select designated Sample for Parent A", 
+                                choices = "Pending Upload"),
+                    selectInput(inputId = "parentBInput", 
+                                label = "Select designated Sample for Parent B", 
+                                choices = "Pending Upload"),
                     # Button
                     downloadButton("downloadData", "Download JoinMap Loc File"),
-                    downloadButton("downloadFunctional", "Download CSV of the Functional Polymorphic Markers of your project")
+                    downloadButton("downloadFunctional", "Download CSV of the Functional Polymorphic Markers")
                 ),
                 mainPanel(
                     #plotOutput("markerHetBar"),
-                    plotOutput("markerIndBar")
+                    plotOutput("markerIndBar", width = "100%")
                 )
             )
         ),
@@ -77,7 +73,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-    options(shiny.maxRequestSize=50*1024^2)
+    options(shiny.maxRequestSize=100*1024^2)
     #output$value1 <- reactive({ input$parentAInput })
     #output$value2 <- reactive({ input$parentBInput })
     #output$value3 <- reactive({ input$variable })
@@ -150,6 +146,9 @@ server <- function(input, output, session) {
             dataFunctional <- dataFunctional[,colnames(data) %in% name.list]
             cat(dim(dataFunctional), "\n")
         }
+        updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
+        updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
+        
         return(dataFunctional)
     })
     
@@ -158,11 +157,14 @@ server <- function(input, output, session) {
         filename = function() {
             file2 <- input$file1[1,1]
             #ext <- tools::file_ext(input$file1[[1, 'datapath']])
+            file2 <-tools::file_path_sans_ext(file2)
             paste(file2, "_JoinMapFile.loc", sep = "")
         },
         content = function(filename) {
             req(input$file1[1,1])
             req(data())
+            req(input$parentAInput)
+            req(input$parentBInput)
             #this function will create a JoinMap file with the F2 format from the variables given
             makeJoinMapF2File <- function(outFile, population.recast)
             {
@@ -177,7 +179,7 @@ server <- function(input, output, session) {
                 #****************************************
                 #****************************************
                 cat("\n")
-                cat("popt = F2")
+                cat("popt =", input$variable)
                 cat("\n")
                 cat(paste("nloc =", nrow(population.recast)))
                 cat("\n")
@@ -325,6 +327,7 @@ server <- function(input, output, session) {
         filename = function() {
             file2 <- input$file1[1,1]
             #ext <- tools::file_ext(input$file1[[1, 'datapath']])
+            file2 <-tools::file_path_sans_ext(file2)
             paste(file2, "_FunctionalPolymorphicMarkers.csv", sep = "")
         },
         content = function(filename) {
@@ -385,6 +388,7 @@ server <- function(input, output, session) {
         filename = function() {
             file5 <- input$file4
             #ext <- tools::file_ext(file2$datapath)
+            file5 <-tools::file_path_sans_ext(file5)
             paste(file5, "_IUPAC.csv", sep = "")
         },
         content = function(filename) {
