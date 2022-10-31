@@ -112,7 +112,18 @@ server <- function(input, output, session) {
                 {
                     tmp <- read.delim(input$file1[[i, 'datapath']], skip = 9, check.names = FALSE)
                 }
-                cat(tmp[1,1], "\n")
+                #check the format of the Final Report file
+                #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
+                #-- acceptable given these 1st 7 are functionalMonomorphic
+                for (i in 2){
+                    if (isFALSE(tmp[1,i] == "TT" || tmp[1,i] == "--") && isFALSE(tmp[2,i] == "CC" || tmp[2,i] == "--") && isFALSE(tmp[3,i] == "TT" || tmp[3,i] == "--") && isFALSE(tmp[4,i] == "GG" || tmp[4,i] == "--") && isFALSE(tmp[5,i] == "AA" || tmp[5,i] == "--") && isFALSE(tmp[6,i] == "--") && isFALSE(tmp[7,i] == "TT" || tmp[7,i] == "--") && isFALSE(tmp[8,i] == "AC" || tmp[8,i] == "--"))
+                        #if (isFALSE(t1) && isFALSE(t2) && isFALSE(t3) && isFALSE(t4) && isFALSE(t5) && isFALSE(t6) && isFALSE(t7) && isFALSE(t8))
+                    {
+                        #if the Report file is incorrect, throw an error and exit the script
+                        stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    }
+                }
+                #cat(tmp[1,1], "\n")
                 tmp = as.data.frame(tmp)
                 data = cbind(data, tmp)
         }}
@@ -120,18 +131,7 @@ server <- function(input, output, session) {
         rownames(data) <- data[,1]
         #remove 1st column
         data <- data[,-1]
-        cat("data", dim(data), "\n")
-        #check the format of the Final Report file
-        #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
-        #-- acceptable given these 1st 7 are functionalMonomorphic
-        for (i in ncol(data)){
-            if (isFALSE(data[1,i] == "TT" || data[1,i] == "--") && isFALSE(data[2,i] == "CC" || data[2,i] == "--") && isFALSE(data[3,i] == "TT" || data[3,i] == "--") && isFALSE(data[4,i] == "GG" || data[4,i] == "--") && isFALSE(data[5,i] == "AA" || data[5,i] == "--") && isFALSE(data[6,i] == "--") && isFALSE(data[7,i] == "TT" || data[7,i] == "--") && isFALSE(data[8,i] == "AC" || data[8,i] == "--"))
-                #if (isFALSE(t1) && isFALSE(t2) && isFALSE(t3) && isFALSE(t4) && isFALSE(t5) && isFALSE(t6) && isFALSE(t7) && isFALSE(t8))
-            {
-                #if the Report file is incorrect, throw an error and exit the script
-                stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
-            }
-        }
+        #cat("data", dim(data), "\n")
         rownames(table) = table[,1]
         table_s = table[rownames(table) %in% rownames(data),]
         f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
@@ -374,7 +374,7 @@ server <- function(input, output, session) {
         {
             data <- read.delim(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
         }
-        for (i in ncol(data)){
+        for (i in 3){
             if (isFALSE(data[1,i] == "TT" || data[1,i] == "--") && isFALSE(data[2,i] == "CC" || data[2,i] == "--") && isFALSE(data[3,i] == "TT" || data[3,i] == "--") && isFALSE(data[4,i] == "GG" || data[4,i] == "--") && isFALSE(data[5,i] == "AA" || data[5,i] == "--") && isFALSE(data[6,i] == "--") && isFALSE(data[7,i] == "TT" || data[7,i] == "--") && isFALSE(data[8,i] == "AC" || data[8,i] == "--"))
                 #if (isFALSE(t1) && isFALSE(t2) && isFALSE(t3) && isFALSE(t4) && isFALSE(t5) && isFALSE(t6) && isFALSE(t7) && isFALSE(t8))
             {
