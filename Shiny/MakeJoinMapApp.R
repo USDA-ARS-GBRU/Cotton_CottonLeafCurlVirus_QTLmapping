@@ -230,9 +230,9 @@ server <- function(input, output, session) {
                 #initialize all cells as het initially
                 population.recast[,] <- "H"
                 
-                population.recast[which(population == "--", arr.ind = TRUE)] <- "-"
-                population.recast[which(population==parentA.matrix, arr.ind = TRUE)] <- "A"
-                population.recast[which(population==parentB.matrix, arr.ind = TRUE)] <- "B"
+                population.recast[population == "--"] <- "-"
+                population.recast[population==parentA.matrix] <- "A"
+                population.recast[population==parentB.matrix] <- "B"
                 #write.csv(population.recast, file = "pop3.csv")
                 return(population.recast)
             }
