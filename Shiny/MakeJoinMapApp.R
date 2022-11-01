@@ -105,10 +105,6 @@ server <- function(input, output, session) {
         }
         if(nrow(input$file1) > 1){
             for(i in 2:length(input$file1[,1])){
-                cat(input$file1[i,1], "\n")
-                #file <- input$file1[i,1]
-                #cat(file, "\n")
-                cat(input$file1[[1, 'datapath']], "\n")
                 #ext <- tools::file_ext(file$datapath)
                 if (tolower(tools::file_ext(input$file1[[i, 'datapath']])) == "csv")
                 {
@@ -128,7 +124,6 @@ server <- function(input, output, session) {
                         stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
                     }
                 }
-                #cat(tmp[1,1], "\n")
                 tmp = as.data.frame(tmp)
                 data = cbind(data, tmp)
             }}
@@ -136,20 +131,16 @@ server <- function(input, output, session) {
         rownames(data) <- data[,1]
         #remove 1st column
         data <- data[,-1]
-        #cat("data", dim(data), "\n")
         rownames(table) = table[,1]
         table_s = table[rownames(table) %in% rownames(data),]
         f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
         dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
-        #cat("dataFunctional", dim(dataFunctional), "\n")
         if(!is.null(input$file3)==T){
-            #cat(input$file3[1,], !is.null(input$file3), "\n")
             name.list <- read.delim(input$file3[[1, 'datapath']], header = FALSE)
-            #cat(dim(name.list), "\n")
+
             name.list <- base::t(name.list)
             name.list <- base::t(name.list)
             dataFunctional <- dataFunctional[,colnames(data) %in% name.list]
-            #cat(dim(dataFunctional), "\n")
         }
         updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
         updateSelectInput(session,"parentBInput",choices=colnames(dataFunctional)) 
@@ -240,27 +231,17 @@ server <- function(input, output, session) {
                 return(population.recast)
             }
             
-            #cat(input$file3[[1]], "\n")
-            #if(!is.null(input$file3))
-            #{
-            #    name.list <- read.delim(input$file3, header = FALSE)
-            #    data <- data[,colnames(data) %in% name.list]
-            #}
             dataFunctional <- as.data.frame(data(), check.names = FALSE)
-            cat("dataFunctional", dim(dataFunctional), " \n")
-            #cat("f2_poly", dim(f2_poly), " \n")
             
             #*********
             #get parent A and parent B from user input
             parentA <- dataFunctional[ , input$parentAInput, drop = FALSE]
-            #cat(input$parentAInput, "\n")
-            #cat("parentA", dim(parentA), "\n")
             parentB <- dataFunctional[ , input$parentBInput, drop = FALSE]
-            #cat("parentB", dim(parentB), "\n")
+
             #separate into different arrays
             #remove from f2 population array
             dataNoParents <- dataFunctional[ , -which(names(dataFunctional) %in% c(input$parentAInput,input$parentBInput))]
-            #cat(dim(dataNoParents), "\n")
+
             #need to drop down to functional markers
             #****
             #*
@@ -277,21 +258,15 @@ server <- function(input, output, session) {
                     tmp = TRUE}
                 temp = rbind(temp,tmp)
             }
-            #cat("temp", dim(temp), "\n")
+
             #reduced has markers where the parents are different and neither are het for the marker
             f2_reduced = dataNoParents[temp,]
-            #cat("f2_reduced", dim(f2_reduced), "\n")
             parentA_reduced = parentA[temp,, drop=FALSE]
-            #cat("parentA_reduced", dim(parentA_reduced), "\n")
             parentB_reduced = parentB[temp,, drop=FALSE]
-            #cat("parentB_reduced", dim(parentB_reduced), "\n")
             #now get het of population
             hetPercent = apply(f2_reduced, 
                                MARGIN = 1,
                                function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional)
-            
-            #cat("hetPercent", length(hetPercent), "\n")
-            #cat("hetPercent", as.numeric(input$hetLevel), typeof(as.numeric(input$hetLevel)), "\n")
             
             if (hetPercent[1] >= as.numeric(input$hetLevel)){temp = TRUE
             } else {temp = FALSE}
@@ -302,13 +277,11 @@ server <- function(input, output, session) {
             }
             
             parentA_keep = parentA_reduced[temp,, drop=FALSE]
-            #cat("parentA_keep", dim(parentA_keep), "\n")
             parentB_keep = parentB_reduced[temp,, drop=FALSE]
-            #cat("parentB_keep", dim(parentB_keep), "\n")
             f2_keep = f2_reduced[temp,]
-            #cat("f2_keep", dim(f2_keep), "\n")
+
             population.recast <- makeJoinMapArray(population = f2_keep, parentA = parentA_keep, parentB = parentB_keep)
-            #write.csv(f2_keep, filename, row.names = FALSE)
+
             makeJoinMapF2File(outFile = filename, population.recast = population.recast)
         }
     )
@@ -449,23 +422,40 @@ server <- function(input, output, session) {
             
             #print("Making the new matrix.  This may take a few minutes.")
             population.recast <- data
-            population.recast <- lapply(population.recast, function(x) {gsub("TT", "T", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("AA", "A", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("CC", "C", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("GG", "G", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("AG", "R", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("GA", "R", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("CT", "Y", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("TC", "Y", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("GT", "K", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("TG", "K", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("AC", "M", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("CA", "M", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("GC", "S", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("CG", "S", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("TA", "W", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("AT", "W", x)})
-            population.recast <- lapply(population.recast, function(x) {gsub("--", "-", x)})
+            #population.recast <- lapply(population.recast, function(x) {gsub("TT", "T", x)})
+            population.recast[population == "TT"] <- "T"
+            #population.recast <- lapply(population.recast, function(x) {gsub("AA", "A", x)})
+            population.recast[population == "AA"] <- "A"
+            #population.recast <- lapply(population.recast, function(x) {gsub("CC", "C", x)})
+            population.recast[population == "CC"] <- "C"
+            #population.recast <- lapply(population.recast, function(x) {gsub("GG", "G", x)})
+            population.recast[population == "GG"] <- "G"
+            #population.recast <- lapply(population.recast, function(x) {gsub("AG", "R", x)})
+            population.recast[population == "AG"] <- "R"
+            #population.recast <- lapply(population.recast, function(x) {gsub("GA", "R", x)})
+            population.recast[population == "GA"] <- "R"
+            #population.recast <- lapply(population.recast, function(x) {gsub("CT", "Y", x)})
+            population.recast[population == "CT"] <- "Y"
+            #population.recast <- lapply(population.recast, function(x) {gsub("TC", "Y", x)})
+            population.recast[population == "TC"] <- "Y"
+            #population.recast <- lapply(population.recast, function(x) {gsub("GT", "K", x)})
+            population.recast[population == "GT"] <- "K"
+            #population.recast <- lapply(population.recast, function(x) {gsub("TG", "K", x)})
+            population.recast[population == "TG"] <- "K"
+            #population.recast <- lapply(population.recast, function(x) {gsub("AC", "M", x)})
+            population.recast[population == "AC"] <- "M"
+            #population.recast <- lapply(population.recast, function(x) {gsub("CA", "M", x)})
+            population.recast[population == "CA"] <- "M"
+            #population.recast <- lapply(population.recast, function(x) {gsub("GC", "S", x)})
+            population.recast[population == "GC"] <- "S"
+            #population.recast <- lapply(population.recast, function(x) {gsub("CG", "S", x)})
+            population.recast[population == "CG"] <- "S"
+            #population.recast <- lapply(population.recast, function(x) {gsub("TA", "W", x)})
+            population.recast[population == "TA"] <- "W"
+            #population.recast <- lapply(population.recast, function(x) {gsub("AT", "W", x)})
+            population.recast[population == "AT"] <- "W"
+            #population.recast <- lapply(population.recast, function(x) {gsub("--", "-", x)})
+            population.recast[population == "--"] <- "-"
             temp <- as.data.frame(matrix(unlist(population.recast), nrow=length(unlist(population.recast[1]))))
             population.recast <- temp
             rownames(population.recast) <- rownames(data)
