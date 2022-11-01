@@ -374,7 +374,7 @@ server <- function(input, output, session) {
             req(hetPercent())
             req(naCount())
             dataFunctional <- as.data.frame(data(), check.names = FALSE)
-            df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount(), "column" = colnames(dataFunctional))
+            df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount())
             
             write.csv(df, filename, row.names = TRUE)
         }
