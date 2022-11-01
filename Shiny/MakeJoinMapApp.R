@@ -49,7 +49,9 @@ ui <- fluidPage(
                          h5("Download JoinMap .Loc Input File"),
                          downloadButton("downloadData", "Download .Loc File"),
                          h5("Download CSV of the Functional Polymorphic Markers"),
-                         downloadButton("downloadFunctional", "Download Markers")
+                         downloadButton("downloadFunctional", "Download Markers"),
+                         downloadButton("downloadGraph", "Download Graph"),
+                         downloadButton("downloadHetData", "Download Graph Data")
                      ),
                      mainPanel(
                          #plotOutput("markerHetBar"),
@@ -321,32 +323,74 @@ server <- function(input, output, session) {
             write.csv(data(), filename, row.names = TRUE)
         }
     )
-    output$markerIndBar <- renderPlot({
+    hetPercent = reactive({
         req(input$file1[1,1])
         req(data())
         dataFunctional <- as.data.frame(data(), check.names = FALSE)
+        het = apply(dataFunctional, 
+                    MARGIN = 2,
+                    function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / nrow(dataFunctional) * 100
         
-        hetPercent = apply(dataFunctional, 
-                           MARGIN = 2,
-                           function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / nrow(dataFunctional) * 100
-        
-        
-        cat("hetPercent", length(hetPercent), dim(hetPercent), "\n")
+        return(het)
+    })
+    naCount = reactive({
+        req(input$file1[1,1])
+        req(data())
+        dataFunctional <- as.data.frame(data(), check.names = FALSE)
         naCount = apply(dataFunctional, 
                         MARGIN = 2,
                         function(x) sum( (x %in% c("--")))) / nrow(dataFunctional) * 100
-        df <- data.frame("hetPercent" = hetPercent, "naCount" = naCount, "column" = colnames(dataFunctional))
+        
+        return(naCount)
+    })
+    output$markerIndBar <- renderPlot({
+        req(input$file1[1,1])
+        req(data())
+        req(naCount())
+        req(hetPercent())
+        dataFunctional <- as.data.frame(data(), check.names = FALSE)
+        df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount(), "column" = colnames(dataFunctional))
         
         df.m <- melt(df, id.vars='column')
         ggplot(data = df.m, mapping = aes(column, value)) +
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
             theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
             labs(title = element_text("Percentatges Per Sample")) +
-            ylab("Sample Name") + xlab("") +
+            ylab("Percentatges Per Sample") + xlab("") +
             ggtitle("Percentage of Heterzygous and N/A Markers per Sample") +
             coord_flip()
         
     })
+    output$downloadGraph <- downloadHandler(
+        filename = function() {
+            file2 <- input$file1[1,1]
+            #ext <- tools::file_ext(input$file1[[1, 'datapath']])
+            file2 <-tools::file_path_sans_ext(file2)
+            paste(file2, "_HetGraph.png", sep = "")
+        },
+        content = function(filename) {
+            req(data())
+            req(output$markerIndBar())
+            ggsave(filename, plot = output$markerIndBar(), device = "png")
+        }
+    )
+    output$downloadHetData <- downloadHandler(
+        filename = function() {
+            file2 <- input$file1[1,1]
+            #ext <- tools::file_ext(input$file1[[1, 'datapath']])
+            file2 <-tools::file_path_sans_ext(file2)
+            paste(file2, "_HetandNAPercents.csv", sep = "")
+        },
+        content = function(filename) {
+            req(data())
+            req(hetPercent())
+            req(naCount())
+            dataFunctional <- as.data.frame(data(), check.names = FALSE)
+            df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount(), "column" = colnames(dataFunctional))
+            
+            write.csv(df, filename, row.names = TRUE)
+        }
+    )
     dataIUPAC = reactive({
         req(input$file4)
         #req(file)
