@@ -46,8 +46,10 @@ ui <- fluidPage(
                                 label = "Select designated Sample for Parent B", 
                                 choices = "Pending Upload"),
                     # Button
-                    downloadButton("downloadData", "Download JoinMap Loc File"),
-                    downloadButton("downloadFunctional", "Download CSV of the Functional Polymorphic Markers")
+                    h5("Download JoinMap .Loc Input File"),
+                    downloadButton("downloadData", "Download .Loc File"),
+                    h5("Download CSV of the Functional Polymorphic Markers"),
+                    downloadButton("downloadFunctional", "Download Markers")
                 ),
                 mainPanel(
                     #plotOutput("markerHetBar"),
@@ -136,15 +138,15 @@ server <- function(input, output, session) {
         table_s = table[rownames(table) %in% rownames(data),]
         f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
         dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
-        cat("dataFunctional", dim(dataFunctional), "\n")
+        #cat("dataFunctional", dim(dataFunctional), "\n")
         if(!is.null(input$file3)==T){
             #cat(input$file3[1,], !is.null(input$file3), "\n")
             name.list <- read.delim(input$file3[[1, 'datapath']], header = FALSE)
-            cat(dim(name.list), "\n")
+            #cat(dim(name.list), "\n")
             name.list <- base::t(name.list)
             name.list <- base::t(name.list)
             dataFunctional <- dataFunctional[,colnames(data) %in% name.list]
-            cat(dim(dataFunctional), "\n")
+            #cat(dim(dataFunctional), "\n")
         }
         updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
         updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
@@ -264,14 +266,14 @@ server <- function(input, output, session) {
             #*********
             #get parent A and parent B from user input
             parentA <- dataFunctional[ , input$parentAInput, drop = FALSE]
-            cat(input$parentAInput, "\n")
-            cat("parentA", dim(parentA), "\n")
+            #cat(input$parentAInput, "\n")
+            #cat("parentA", dim(parentA), "\n")
             parentB <- dataFunctional[ , input$parentBInput, drop = FALSE]
-            cat("parentB", dim(parentB), "\n")
+            #cat("parentB", dim(parentB), "\n")
             #separate into different arrays
             #remove from f2 population array
             dataNoParents <- dataFunctional[ , -which(names(dataFunctional) %in% c(input$parentAInput,input$parentBInput))]
-            cat(dim(dataNoParents), "\n")
+            #cat(dim(dataNoParents), "\n")
             #need to drop down to functional markers
             #****
             #*
@@ -288,21 +290,21 @@ server <- function(input, output, session) {
                     tmp = TRUE}
                 temp = rbind(temp,tmp)
             }
-            cat("temp", dim(temp), "\n")
+            #cat("temp", dim(temp), "\n")
             #reduced has markers where the parents are different and neither are het for the marker
             f2_reduced = dataNoParents[temp,]
-            cat("f2_reduced", dim(f2_reduced), "\n")
+            #cat("f2_reduced", dim(f2_reduced), "\n")
             parentA_reduced = parentA[temp,, drop=FALSE]
-            cat("parentA_reduced", dim(parentA_reduced), "\n")
+            #cat("parentA_reduced", dim(parentA_reduced), "\n")
             parentB_reduced = parentB[temp,, drop=FALSE]
-            cat("parentB_reduced", dim(parentB_reduced), "\n")
+            #cat("parentB_reduced", dim(parentB_reduced), "\n")
             #now get het of population
             hetPercent = apply(f2_reduced, 
                                MARGIN = 1,
                                function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional)
             
-            cat("hetPercent", length(hetPercent), "\n")
-            cat("hetPercent", as.numeric(input$hetLevel), typeof(as.numeric(input$hetLevel)), "\n")
+            #cat("hetPercent", length(hetPercent), "\n")
+            #cat("hetPercent", as.numeric(input$hetLevel), typeof(as.numeric(input$hetLevel)), "\n")
             
             if (hetPercent[1] >= as.numeric(input$hetLevel)){temp = TRUE
             } else {temp = FALSE}
@@ -313,11 +315,11 @@ server <- function(input, output, session) {
             }
             
             parentA_keep = parentA_reduced[temp,, drop=FALSE]
-            cat("parentA_keep", dim(parentA_keep), "\n")
+            #cat("parentA_keep", dim(parentA_keep), "\n")
             parentB_keep = parentB_reduced[temp,, drop=FALSE]
-            cat("parentB_keep", dim(parentB_keep), "\n")
+            #cat("parentB_keep", dim(parentB_keep), "\n")
             f2_keep = f2_reduced[temp,]
-            cat("f2_keep", dim(f2_keep), "\n")
+            #cat("f2_keep", dim(f2_keep), "\n")
             population.recast <- makeJoinMapArray(population = f2_keep, parentA = parentA_keep, parentB = parentB_keep)
             #write.csv(f2_keep, filename, row.names = FALSE)
             makeJoinMapF2File(outFile = filename, population.recast = population.recast)
