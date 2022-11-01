@@ -22,40 +22,40 @@ table = read.csv("TableS1 - Sheet1.csv")
 ui <- fluidPage(
     tabsetPanel(
         tabPanel("JoinMap", fluid = TRUE,
-            sidebarLayout(
-                sidebarPanel(
-                    fileInput("file1", "Choose TXT/CSV Final Report File(s)", multiple = TRUE, accept = c("text/csv", 
-                                "text/comma-separated-values,text/plain",
-                                ".csv", ".txt")),
-                    fileInput("file3", "Optional: Choose TXT File Containing List of Sample Names", accept = c("text/csv", 
-                                "text/comma-separated-values,text/plain",
-                                ".csv", ".txt")),
-                    selectInput("variable", "Select the Population Type:",
-                                c("F2" = "F2",
-                                  "F3" = "F3",
-                                  "F4" = "F4")),
-                    textInput("hetLevel", 
-                              label = "Please give the Minimum Heterozygousity Level in decimal (ex: 5% is 0.05)", 
-                              value = "", 
-                              width = "100%",
-                              placeholder = "0.05"),
-                    selectInput(inputId = "parentAInput", 
-                                label = "Select designated Sample for Parent A", 
-                                choices = "Pending Upload"),
-                    selectInput(inputId = "parentBInput", 
-                                label = "Select designated Sample for Parent B", 
-                                choices = "Pending Upload"),
-                    # Button
-                    h5("Download JoinMap .Loc Input File"),
-                    downloadButton("downloadData", "Download .Loc File"),
-                    h5("Download CSV of the Functional Polymorphic Markers"),
-                    downloadButton("downloadFunctional", "Download Markers")
-                ),
-                mainPanel(
-                    #plotOutput("markerHetBar"),
-                    plotOutput("markerIndBar", width = "100%")
-                )
-            )
+                 sidebarLayout(
+                     sidebarPanel(
+                         fileInput("file1", "Choose TXT/CSV Final Report File(s)", multiple = TRUE, accept = c("text/csv", 
+                                                                                                               "text/comma-separated-values,text/plain",
+                                                                                                               ".csv", ".txt")),
+                         fileInput("file3", "Optional: Choose TXT File Containing List of Sample Names", accept = c("text/csv", 
+                                                                                                                    "text/comma-separated-values,text/plain",
+                                                                                                                    ".csv", ".txt")),
+                         selectInput("variable", "Select the Population Type:",
+                                     c("F2" = "F2",
+                                       "F3" = "F3",
+                                       "F4" = "F4")),
+                         textInput("hetLevel", 
+                                   label = "Please give the Minimum Heterozygousity Level in decimal (ex: 5% is 0.05)", 
+                                   value = "", 
+                                   width = "100%",
+                                   placeholder = "0.05"),
+                         selectInput(inputId = "parentAInput", 
+                                     label = "Select designated Sample for Parent A", 
+                                     choices = "Pending Upload"),
+                         selectInput(inputId = "parentBInput", 
+                                     label = "Select designated Sample for Parent B", 
+                                     choices = "Pending Upload"),
+                         # Button
+                         h5("Download JoinMap .Loc Input File"),
+                         downloadButton("downloadData", "Download .Loc File"),
+                         h5("Download CSV of the Functional Polymorphic Markers"),
+                         downloadButton("downloadFunctional", "Download Markers")
+                     ),
+                     mainPanel(
+                         #plotOutput("markerHetBar"),
+                         plotOutput("markerIndBar", width = "100%")
+                     )
+                 )
         ),
         tabPanel("IUPAC", fluid = TRUE,
                  sidebarLayout(
@@ -128,7 +128,7 @@ server <- function(input, output, session) {
                 #cat(tmp[1,1], "\n")
                 tmp = as.data.frame(tmp)
                 data = cbind(data, tmp)
-        }}
+            }}
         #set the row names to be the 1st column
         rownames(data) <- data[,1]
         #remove 1st column
@@ -149,7 +149,7 @@ server <- function(input, output, session) {
             #cat(dim(dataFunctional), "\n")
         }
         updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
-        updateSelectInput(session,"parentAInput",choices=colnames(dataFunctional)) 
+        updateSelectInput(session,"parentBInput",choices=colnames(dataFunctional)) 
         
         return(dataFunctional)
     })
@@ -221,34 +221,18 @@ server <- function(input, output, session) {
             #any marker position in F2 with a "--" will be changed to a "-"
             makeJoinMapArray <- function(population, parentA, parentB)
             {
-                #initialize array, will delete this row later
-                tp <- c(1:ncol(population))
-                #initialize column array, will delete this placeholder later
-                temp <- ""
-                #for each column of each row, determine if the F2 matches A or B or is heterozygous
-                for(i in 1:nrow(population)){ for(j in 1:ncol(population)){
-                    if(population[i,j] == parentA[i,1]){
-                        x = 'A'} else if(population[i,j] == parentB[i,1]){
-                            x = 'B'} else if(population[i,j] == "--"){x = '-'} else{x = 'H'}
-                    temp <- cbind(temp,x)}
-                    #delete the placeholder at position 1
-                    temp <- temp[-1]
-                    #bind temp (row of length columns of population) to bottom of tp matrix
-                    tp <- rbind(tp,temp)
-                    if(i == nrow(population))
-                    {
-                        #set population.recast to equal matrix in tp if finished final row
-                        population.recast <- tp
-                    }
-                    #reset temp to placeholder ""
-                    temp <- ""}
+                #initialize output matrix
+                population.recast <- population
+                #create parent matrices of the same dim as population
+                parentA.matrix = matrix(rep(parentA, ncol(f2_keep)), ncol=ncol(parentA))
+                parentB.matrix = matrix(rep(parentB, ncol(f2_keep)), ncol=ncol(parentB))
                 
-                #get rid of the first row which was created as a placeholder
-                population.recast <- population.recast[-1,]
-                #get rownames from F2 population
-                rownames(population.recast) <- rownames(population)
-                #get colnames from F2 population
-                colnames(population.recast) <- colnames(population)
+                #initialize all cells as het initially
+                population.recast[,] <- "H"
+                
+                population.recast[which(population == "--", arr.ind = TRUE)] <- "-"
+                population.recast[which(population==parentA.matrix, arr.ind = TRUE)] <- "A"
+                population.recast[which(population==parentB.matrix, arr.ind = TRUE)] <- "B"
                 #write.csv(population.recast, file = "pop3.csv")
                 return(population.recast)
             }
@@ -352,7 +336,7 @@ server <- function(input, output, session) {
                         MARGIN = 2,
                         function(x) sum( (x %in% c("--")))) / nrow(dataFunctional) * 100
         df <- data.frame("hetPercent" = hetPercent, "naCount" = naCount, "column" = colnames(dataFunctional))
-
+        
         df.m <- melt(df, id.vars='column')
         ggplot(data = df.m, mapping = aes(column, value)) +
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
