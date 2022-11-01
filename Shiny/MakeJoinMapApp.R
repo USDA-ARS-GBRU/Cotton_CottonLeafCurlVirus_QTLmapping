@@ -16,6 +16,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(reshape2)
+library(gridExtra)
 table = read.csv("TableS1 - Sheet1.csv")
 
 # Define UI for application that draws a histogram
@@ -350,10 +351,10 @@ server <- function(input, output, session) {
         req(hetPercent())
         dataFunctional <- as.data.frame(data(), check.names = FALSE)
         df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount(), "column" = colnames(dataFunctional))
-        
         df.m <- melt(df, id.vars='column')
         ggplot(data = df.m, mapping = aes(column, value)) +
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+            scale_x_discrete(limits=df$column,breaks=df$column[seq(1,length(df$column),by=5)]) +
             theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
             labs(title = element_text("Percentatges Per Sample")) +
             ylab("Percentatges Per Sample") + xlab("") +
@@ -369,9 +370,23 @@ server <- function(input, output, session) {
             paste(file2, "_HetGraph.png", sep = "")
         },
         content = function(filename) {
+            req(input$file1[1,1])
             req(data())
-            req(output$markerIndBar())
-            ggsave(filename, plot = output$markerIndBar(), device = "png")
+            req(naCount())
+            req(hetPercent())
+            dataFunctional <- as.data.frame(data(), check.names = FALSE)
+            df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount(), "column" = colnames(dataFunctional))
+            
+            df.m <- melt(df, id.vars='column')
+            plot = ggplot(data = df.m, mapping = aes(column, value)) +
+                geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+                scale_x_discrete(limits=df$column,breaks=df$column[seq(1,length(df$column),by=5)]) +
+                theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+                labs(title = element_text("Percentatges Per Sample")) +
+                ylab("Percentatges Per Sample") + xlab("Sample Name (Every 5th Shown)") +
+                ggtitle("Percentage of Heterzygous and N/A Markers per Sample") +
+                coord_flip()
+            ggsave(filename, plot = plot, device = "png")
         }
     )
     output$downloadHetData <- downloadHandler(
