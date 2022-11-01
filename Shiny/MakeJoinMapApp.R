@@ -325,9 +325,15 @@ server <- function(input, output, session) {
         dataFunctional <- as.data.frame(data(), check.names = FALSE)
         df <- data.frame("hetPercent" = hetPercent(), "naCount" = naCount(), "column" = colnames(dataFunctional))
         df.m <- melt(df, id.vars='column')
+        samples = length(df$column)
+        if(samples <= 20){
+            step = 1
+        } else{
+            step = 5
+        }
         ggplot(data = df.m, mapping = aes(column, value)) +
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
-            scale_x_discrete(limits=df$column,breaks=df$column[seq(1,length(df$column),by=5)]) +
+            scale_x_discrete(limits=df$column,breaks=df$column[seq(1,length(df$column),by=step)]) +
             theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
             labs(title = element_text("Percentatges Per Sample")) +
             ylab("Percentatges Per Sample") + xlab("") +
