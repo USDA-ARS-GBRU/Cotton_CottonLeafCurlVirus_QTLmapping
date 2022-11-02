@@ -50,9 +50,9 @@ ui <- fluidPage(
                          h5("Download JoinMap .Loc Input File"),
                          downloadButton("downloadData", "Download .Loc File"),
                          h5("Download CSV of the Functional Polymorphic Markers"),
-                         downloadButton("downloadFunctional", "Download Markers"),
-                         downloadButton("downloadGraph", "Download Graph"),
-                         downloadButton("downloadHetData", "Download Graph Data")
+                         downloadButton("downloadFunctional", "Download Markers", style="width:180px; text-align: left"),
+                         downloadButton("downloadGraph", "Download Graph", style="width:180px; text-align: left"),
+                         downloadButton("downloadHetData", "Download Graph Data", style="width:180px; text-align: left")
                      ),
                      mainPanel(
                          #plotOutput("markerHetBar"),
