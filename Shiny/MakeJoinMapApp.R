@@ -17,6 +17,7 @@ library(stringr)
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
+library(tools)
 table = read.csv("TableS1 - Sheet1.csv")
 
 # Define UI for application that draws a histogram
@@ -79,9 +80,6 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     options(shiny.maxRequestSize=100*1024^2)
-    #output$value1 <- reactive({ input$parentAInput })
-    #output$value2 <- reactive({ input$parentBInput })
-    #output$value3 <- reactive({ input$variable })
     dafault_val <- 0.05
     observe({
         if (!is.numeric(input$hetLevel)) {
@@ -92,10 +90,7 @@ server <- function(input, output, session) {
     
     data = reactive({
         req(input$file1[1,1])
-        #req(file)
-        #validate(need(ext == "csv", "Please upload a csv file"))
         
-        #read.csv(file$datapath, skip = 9, check.names = FALSE)
         if (tolower(tools::file_ext(input$file1[[1, 'datapath']])) == "csv")
         {
             data <- read.csv(input$file1[[1, 'datapath']], skip = 9, check.names = FALSE)
@@ -112,17 +107,6 @@ server <- function(input, output, session) {
                 } else
                 {
                     tmp <- read.delim(input$file1[[i, 'datapath']], skip = 9, check.names = FALSE)
-                }
-                #check the format of the Final Report file
-                #first 8 should be TT, CC, TT, GG, AA, --, TT, AC
-                #-- acceptable given these 1st 7 are functionalMonomorphic
-                for (i in 2){
-                    if (isFALSE(tmp[1,i] == "TT" || tmp[1,i] == "--") && isFALSE(tmp[2,i] == "CC" || tmp[2,i] == "--") && isFALSE(tmp[3,i] == "TT" || tmp[3,i] == "--") && isFALSE(tmp[4,i] == "GG" || tmp[4,i] == "--") && isFALSE(tmp[5,i] == "AA" || tmp[5,i] == "--") && isFALSE(tmp[6,i] == "--") && isFALSE(tmp[7,i] == "TT" || tmp[7,i] == "--") && isFALSE(tmp[8,i] == "AC" || tmp[8,i] == "--"))
-                        #if (isFALSE(t1) && isFALSE(t2) && isFALSE(t3) && isFALSE(t4) && isFALSE(t5) && isFALSE(t6) && isFALSE(t7) && isFALSE(t8))
-                    {
-                        #if the Report file is incorrect, throw an error and exit the script
-                        stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
-                    }
                 }
                 tmp = as.data.frame(tmp)
                 data = cbind(data, tmp)
@@ -319,6 +303,41 @@ server <- function(input, output, session) {
     })
     output$markerIndBar <- renderPlot({
         req(input$file1[1,1])
+        validate(
+            need(file_ext(input$file1[1,1]) %in% c(
+                'text/csv',
+                'text/comma-separated-values',
+                'text/tab-separated-values',
+                'text/plain',
+                'text',
+                'txt',
+                'csv',
+                'tsv'
+            ), "Wrong File Format try again!"))
+        for(i in 1:length(input$file1[,1])){
+            stopVar = "good"
+            #ext <- tools::file_ext(file$datapath)
+            if (tolower(tools::file_ext(input$file1[[i, 'datapath']])) == "csv")
+            {
+                tmp <- read.csv(input$file1[[i, 'datapath']], skip = 9, check.names = FALSE)
+            } else
+            {
+                tmp <- read.delim(input$file1[[i, 'datapath']], skip = 9, check.names = FALSE)
+            }
+            rownames(tmp) <- tmp[,1]
+            #remove 1st column
+            tmp <- tmp[,-1]
+            for (i in 2){
+                if (isTRUE(tmp[1,i] == "TT" || tmp[1,i] == "--") && isTRUE(tmp[2,i] == "CC" || tmp[2,i] == "--") && isTRUE(tmp[3,i] == "TT" || tmp[3,i] == "--") && isTRUE(tmp[4,i] == "GG" || tmp[4,i] == "--") && isTRUE(tmp[5,i] == "AA" || tmp[5,i] == "--") && isTRUE(tmp[6,i] == "--") && isTRUE(tmp[7,i] == "TT" || tmp[7,i] == "--") && isTRUE(tmp[8,i] == "AC" || tmp[8,i] == "--")){
+                    #if the Report file is incorrect, throw an error and exit the script
+                    #stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    stopVar = "bad"
+                } else{ stopVar = "good"}
+            }
+            validate(
+                need(stopVar == "bad", "Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+            )
+        }
         req(data())
         req(naCount())
         req(hetPercent())
@@ -387,10 +406,7 @@ server <- function(input, output, session) {
     )
     dataIUPAC = reactive({
         req(input$file4)
-        #req(file)
-        #validate(need(ext == "csv", "Please upload a csv file"))
-        
-        #read.csv(file$datapath, skip = 9, check.names = FALSE)
+
         if (tolower(tools::file_ext(input$file4[[1, 'datapath']])) == "csv")
         {
             data <- read.csv(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
@@ -418,49 +434,25 @@ server <- function(input, output, session) {
         content = function(filename) {
             req(input$file4)
             req(dataIUPAC())
-            #file <- input$file4
-            #ext <- tools::file_ext(file$datapath)
-            #validate(need(ext == "csv", "Please upload a csv file"))
-            
-            #read.csv(file$datapath, skip = 9, check.names = FALSE)
-            #data <- read.csv(file$datapath, skip = 9, check.names = FALSE)
             data = as.data.frame(dataIUPAC(), check.names = FALSE)
             
-            #print("Making the new matrix.  This may take a few minutes.")
             population.recast <- data
-            #population.recast <- lapply(population.recast, function(x) {gsub("TT", "T", x)})
             population.recast[population == "TT"] <- "T"
-            #population.recast <- lapply(population.recast, function(x) {gsub("AA", "A", x)})
             population.recast[population == "AA"] <- "A"
-            #population.recast <- lapply(population.recast, function(x) {gsub("CC", "C", x)})
             population.recast[population == "CC"] <- "C"
-            #population.recast <- lapply(population.recast, function(x) {gsub("GG", "G", x)})
             population.recast[population == "GG"] <- "G"
-            #population.recast <- lapply(population.recast, function(x) {gsub("AG", "R", x)})
             population.recast[population == "AG"] <- "R"
-            #population.recast <- lapply(population.recast, function(x) {gsub("GA", "R", x)})
             population.recast[population == "GA"] <- "R"
-            #population.recast <- lapply(population.recast, function(x) {gsub("CT", "Y", x)})
             population.recast[population == "CT"] <- "Y"
-            #population.recast <- lapply(population.recast, function(x) {gsub("TC", "Y", x)})
             population.recast[population == "TC"] <- "Y"
-            #population.recast <- lapply(population.recast, function(x) {gsub("GT", "K", x)})
             population.recast[population == "GT"] <- "K"
-            #population.recast <- lapply(population.recast, function(x) {gsub("TG", "K", x)})
             population.recast[population == "TG"] <- "K"
-            #population.recast <- lapply(population.recast, function(x) {gsub("AC", "M", x)})
             population.recast[population == "AC"] <- "M"
-            #population.recast <- lapply(population.recast, function(x) {gsub("CA", "M", x)})
             population.recast[population == "CA"] <- "M"
-            #population.recast <- lapply(population.recast, function(x) {gsub("GC", "S", x)})
             population.recast[population == "GC"] <- "S"
-            #population.recast <- lapply(population.recast, function(x) {gsub("CG", "S", x)})
             population.recast[population == "CG"] <- "S"
-            #population.recast <- lapply(population.recast, function(x) {gsub("TA", "W", x)})
             population.recast[population == "TA"] <- "W"
-            #population.recast <- lapply(population.recast, function(x) {gsub("AT", "W", x)})
             population.recast[population == "AT"] <- "W"
-            #population.recast <- lapply(population.recast, function(x) {gsub("--", "-", x)})
             population.recast[population == "--"] <- "-"
             temp <- as.data.frame(matrix(unlist(population.recast), nrow=length(unlist(population.recast[1]))))
             population.recast <- temp
