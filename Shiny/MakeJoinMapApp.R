@@ -41,6 +41,11 @@ ui <- fluidPage(
                                    value = "", 
                                    width = "100%",
                                    placeholder = "0.05"),
+                         textInput("naLevel", 
+                                   label = "Please give the Maximum Missing Data Level in decimal (ex: 5% is 0.05)", 
+                                   value = "", 
+                                   width = "100%",
+                                   placeholder = "0.9"),
                          selectInput(inputId = "parentAInput", 
                                      label = "Select designated Sample for Parent A", 
                                      choices = "Pending Upload"),
@@ -48,9 +53,9 @@ ui <- fluidPage(
                                      label = "Select designated Sample for Parent B", 
                                      choices = "Pending Upload"),
                          # Button
-                         h5("Download JoinMap .Loc Input File"),
+                         h5("Download JoinMap .Loc Input File (May take a min. Do not click more than once)"),
                          downloadButton("downloadData", "Download .Loc File"),
-                         h5("Download CSV of the Functional Polymorphic Markers"),
+                         h5("Download CSV of the Functional Polymorphic Markers (May take a min. Do not click more than once)"),
                          downloadButton("downloadFunctional", "Download Markers", style="width:180px; text-align: left"),
                          downloadButton("downloadGraph", "Download Graph", style="width:180px; text-align: left"),
                          downloadButton("downloadHetData", "Download Graph Data", style="width:180px; text-align: left")
@@ -81,12 +86,17 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     options(shiny.maxRequestSize=100*1024^2)
     dafault_val <- 0.05
+    dafault_val2 <- 0.9
     observe({
         if (!is.numeric(input$hetLevel)) {
             updateNumericInput(session, "hetLevel", value = dafault_val)
         }
     })
-    
+    observe({
+        if (!is.numeric(input$naLevel)) {
+            updateNumericInput(session, "naLevel", value = dafault_val2)
+        }
+    })
     
     data = reactive({
         req(input$file1[1,1])
@@ -260,10 +270,25 @@ server <- function(input, output, session) {
                 temp = rbind(temp,tmp)
             }
             
-            parentA_keep = parentA_reduced[temp,, drop=FALSE]
-            parentB_keep = parentB_reduced[temp,, drop=FALSE]
-            f2_keep = f2_reduced[temp,]
+            parentA_keep1 = parentA_reduced[temp,, drop=FALSE]
+            parentB_keep1 = parentB_reduced[temp,, drop=FALSE]
+            f2_keep1 = f2_reduced[temp,]
 
+            naPercent = apply(f2_reduced, 
+                               MARGIN = 1,
+                               function(x) sum(x %in% c("--"))) / ncol(dataFunctional)
+            
+            if (naPercent[1] <= as.numeric(input$naLevel)){temp = TRUE
+            } else {temp = FALSE}
+            for(i in 2:length(naPercent)){
+                if (naPercent[i] <= as.numeric(input$naLevel)){tmp = TRUE
+                } else {tmp = FALSE}
+                temp = rbind(temp,tmp)
+            }
+            parentA_keep = parentA_keep1[temp,, drop=FALSE]
+            parentB_keep = parentB_keep1[temp,, drop=FALSE]
+            f2_keep = f2_keep1[temp,]
+            
             population.recast <- makeJoinMapArray(population = f2_keep, parentA = parentA_keep, parentB = parentB_keep)
 
             makeJoinMapF2File(outFile = filename, population.recast = population.recast)
@@ -354,8 +379,8 @@ server <- function(input, output, session) {
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
             scale_x_discrete(limits=df$column,breaks=df$column[seq(1,length(df$column),by=step)]) +
             theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-            labs(title = element_text("Percentatges Per Sample")) +
-            ylab("Percentatges Per Sample") + xlab("") +
+            labs(title = element_text("Percentages Per Sample")) +
+            ylab("Percentages Per Sample") + xlab("") +
             ggtitle("Percentage of Heterzygous and N/A Markers per Sample") +
             coord_flip()
         
