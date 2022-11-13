@@ -8,7 +8,7 @@ These scripts were developed for ease of use when analyzing multiple populations
 
 **For easier use, an R Shiny app was developed encasing each of these scripts. Most users can go immediately to using the Shiny app at the link below.** 
 
-**APP LINK**
+[Shiny App](https://gbru-ars.shinyapps.io/Cotton_CLCV_QTLmapping-JoinMapFileCreatorAndIUPACconverter/)
 
 ## Simple Steps to Run Shiny App
 
@@ -16,7 +16,7 @@ These scripts were developed for ease of use when analyzing multiple populations
 
 ### Joinmap Tab
 
-1. Upload one or more Final Report from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k in cvs or txt format
+1. Upload one or more Final Report from Illumina's Genome Studio exported following standard protocol listed here: [CottonGen Website](https://www.cottongen.org/data/community_projects/tamu63k) in cvs or txt format
              Optional: Upload a .txt list of the samples in the Final Report to subset the dataset if project encompasses less samples than what is in the Final Report.
 
 2. Select the population type and the level of heterzygosity per marker to remove (default set to remove markers with less than 5% heterozygosity).
