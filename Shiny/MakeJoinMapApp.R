@@ -45,7 +45,7 @@ ui <- fluidPage(
                                    label = "Please give the Maximum Missing Data Level in decimal (ex: 5% is 0.05)", 
                                    value = "", 
                                    width = "100%",
-                                   placeholder = "0.9"),
+                                   placeholder = "0.1"),
                          selectInput(inputId = "parentAInput", 
                                      label = "Select designated Sample for Parent A", 
                                      choices = "Pending Upload"),
@@ -76,7 +76,7 @@ ui <- fluidPage(
                          
                      ),
                      mainPanel(
-                         tableOutput("contents")
+                         plotOutput("IUPACcheck", width = "100%")
                      )
                  )
         )
@@ -86,7 +86,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     options(shiny.maxRequestSize=100*1024^2)
     dafault_val <- 0.05
-    dafault_val2 <- 0.9
+    dafault_val2 <- 0.1
     observe({
         if (!is.numeric(input$hetLevel)) {
             updateNumericInput(session, "hetLevel", value = dafault_val)
@@ -127,7 +127,7 @@ server <- function(input, output, session) {
         data <- data[,-1]
         rownames(table) = table[,1]
         table_s = table[rownames(table) %in% rownames(data),]
-        f2_poly = data[table_s[,5]=="FunctionalPolymorphic",]
+        f2_poly = data[table_s[,2]=="FunctionalPolymorphic",]
         dataFunctional = data[rownames(data) %in% rownames(f2_poly),]
         if(!is.null(input$file3)==T){
             name.list <- read.delim(input$file3[[1, 'datapath']], header = FALSE)
@@ -339,8 +339,8 @@ server <- function(input, output, session) {
                 'csv',
                 'tsv'
             ), "Wrong File Format try again!"))
+        stopVar = "good"
         for(i in 1:length(input$file1[,1])){
-            stopVar = "good"
             #ext <- tools::file_ext(file$datapath)
             if (tolower(tools::file_ext(input$file1[[i, 'datapath']])) == "csv")
             {
@@ -352,18 +352,20 @@ server <- function(input, output, session) {
             rownames(tmp) <- tmp[,1]
             #remove 1st column
             tmp <- tmp[,-1]
-            for (i in 2){
+            for (i in 1:ncol(tmp)){
                 if (isTRUE(tmp[1,i] == "TT" || tmp[1,i] == "--") && isTRUE(tmp[2,i] == "CC" || tmp[2,i] == "--") && isTRUE(tmp[3,i] == "TT" || tmp[3,i] == "--") && isTRUE(tmp[4,i] == "GG" || tmp[4,i] == "--") && isTRUE(tmp[5,i] == "AA" || tmp[5,i] == "--") && isTRUE(tmp[6,i] == "--") && isTRUE(tmp[7,i] == "TT" || tmp[7,i] == "--") && isTRUE(tmp[8,i] == "AC" || tmp[8,i] == "--")){
                     #if the Report file is incorrect, throw an error and exit the script
                     #stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    stopVar = "good"
+                } else{
                     stopVar = "bad"
-                } else{ stopVar = "good"}
+                    validate(
+                        need(stopVar == "good", "Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    )
+                    }
             }
-            validate(
-                need(stopVar == "bad", "Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
-            )
         }
-        req(data())
+
         req(naCount())
         req(hetPercent())
         dataFunctional <- as.data.frame(data(), check.names = FALSE)
@@ -375,6 +377,7 @@ server <- function(input, output, session) {
         } else{
             step = 5
         }
+        #df.m$col <- factor(df.m$col, levels = unique(df.m$col), ordered = TRUE)
         ggplot(data = df.m, mapping = aes(column, value)) +
             geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
             scale_x_discrete(limits=df$column,breaks=df$column[seq(1,length(df$column),by=step)]) +
@@ -409,7 +412,7 @@ server <- function(input, output, session) {
                 ylab("Percentatges Per Sample") + xlab("Sample Name (Every 5th Shown)") +
                 ggtitle("Percentage of Heterzygous and N/A Markers per Sample") +
                 coord_flip()
-            ggsave(filename, plot = plot, device = "png")
+            ggsave(filename, plot = plot, device = "png", width = nrow(df)/10)
         }
     )
     output$downloadHetData <- downloadHandler(
@@ -438,14 +441,6 @@ server <- function(input, output, session) {
         } else
         {
             data <- read.delim(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
-        }
-        for (i in 3){
-            if (isFALSE(data[1,i] == "TT" || data[1,i] == "--") && isFALSE(data[2,i] == "CC" || data[2,i] == "--") && isFALSE(data[3,i] == "TT" || data[3,i] == "--") && isFALSE(data[4,i] == "GG" || data[4,i] == "--") && isFALSE(data[5,i] == "AA" || data[5,i] == "--") && isFALSE(data[6,i] == "--") && isFALSE(data[7,i] == "TT" || data[7,i] == "--") && isFALSE(data[8,i] == "AC" || data[8,i] == "--"))
-                #if (isFALSE(t1) && isFALSE(t2) && isFALSE(t3) && isFALSE(t4) && isFALSE(t5) && isFALSE(t6) && isFALSE(t7) && isFALSE(t8))
-            {
-                #if the Report file is incorrect, throw an error and exit the script
-                stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
-            }
         }
         return(data)
     })
@@ -486,6 +481,46 @@ server <- function(input, output, session) {
             write.csv(population.recast, filename, row.names = FALSE)
         }
     )
+    output$IUPACcheck <- renderPlot({
+        req(input$file4)
+        req(dataIUPAC())
+        validate(
+            need(file_ext(input$file4) %in% c(
+                'text/csv',
+                'text/comma-separated-values',
+                'text/tab-separated-values',
+                'text/plain',
+                'text',
+                'txt',
+                'csv',
+                'tsv'
+            ), "Wrong File Format try again!"))
+        stopVar = "good"
+            #ext <- tools::file_ext(file$datapath)
+            if (tolower(tools::file_ext(input$file4[[1, 'datapath']])) == "csv")
+            {
+                tmp <- read.csv(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
+            } else
+            {
+                tmp <- read.delim(input$file4[[1, 'datapath']], skip = 9, check.names = FALSE)
+            }
+            rownames(tmp) <- tmp[,1]
+            #remove 1st column
+            tmp <- tmp[,-1]
+            for (i in 1:ncol(tmp)){
+                if (isTRUE(tmp[1,i] == "TT" || tmp[1,i] == "--") && isTRUE(tmp[2,i] == "CC" || tmp[2,i] == "--") && isTRUE(tmp[3,i] == "TT" || tmp[3,i] == "--") && isTRUE(tmp[4,i] == "GG" || tmp[4,i] == "--") && isTRUE(tmp[5,i] == "AA" || tmp[5,i] == "--") && isTRUE(tmp[6,i] == "--") && isTRUE(tmp[7,i] == "TT" || tmp[7,i] == "--") && isTRUE(tmp[8,i] == "AC" || tmp[8,i] == "--")){
+                    #if the Report file is incorrect, throw an error and exit the script
+                    #stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    stopVar = "good"
+                } else{
+                    stopVar = "bad"
+                    validate(
+                        need(stopVar == "good", "Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    )
+                }
+            }
+        
+    })
 }
 
 shinyApp(ui, server)
