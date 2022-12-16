@@ -22,10 +22,18 @@ table = read.csv("TableS1 - Sheet1.csv")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    titlePanel("iCottonQTL"),
+    p("Please cite: Schoonmaker, A. N., Rahmat, M. Z., Iqbal, M. A., Mehboob-ur-Rahman, Youngblood, R. C., Kochan, K. J., Scheffler, B. E., Hulse-Kemp, A. M., & Scheffler, J. A. Detecting Cotton Leaf Curl Virus Resistance Quantitative Trait Loci in Gossypium hirsutum and iCottonQTL a New R/Shiny App to Streamline Genetic Mapping in Cotton. Plants. 2023"),
+    p("This application is designed to streamline the downstream pre-processing of cotton genotyping data derived from the Illumina Array technology (CottonSNP63K). For additional details/tutorial on utilizing the application please see the github link"),
+    tags$a(href="https://github.com/USDA-ARS-GBRU/Cotton_CottonLeafCurlVirus_QTLmapping", "Simple Steps Github Link"),
+    br(),
+    tags$a(href="https://github.com/USDA-ARS-GBRU/Cotton_CottonLeafCurlVirus_QTLmapping/tree/main/Shiny", "Extended Steps Github Link"),
     tabsetPanel(
-        tabPanel("JoinMap", fluid = TRUE,
+        tabPanel("Generate Input File for JoinMap", fluid = TRUE,
                  sidebarLayout(
                      sidebarPanel(
+                         p("Example Final Report and example Sample List download available here:"),
+                         tags$a(href="https://github.com/USDA-ARS-GBRU/Cotton_CottonLeafCurlVirus_QTLmapping/tree/main/Shiny/Example%20Files", "Example Files"),
                          fileInput("file1", "Choose TXT/CSV Final Report File(s)", multiple = TRUE, accept = c("text/csv", 
                                                                                                                "text/comma-separated-values,text/plain",
                                                                                                                ".csv", ".txt")),
@@ -36,16 +44,24 @@ ui <- fluidPage(
                                      c("F2" = "F2",
                                        "F3" = "F3",
                                        "F4" = "F4")),
-                         textInput("hetLevel", 
-                                   label = "Please give the Minimum Heterozygousity Level in decimal (ex: 5% is 0.05)", 
+                         numericInput("naIndLevel", 
+                                      label = "Please give the Maximum Missing Data Level per Sample (see graph) in decimal (ex: 100% is 1)  *This default will output all samples, user may change this, but in doing so may reduce the number of samples exported to the .loc file*", 
+                                      value = "", 
+                                      width = "100%",
+                                      min=0,
+                                      max=1),
+                         numericInput("hetLevel", 
+                                   label = "Please give the Minimum Heterozygosity Level allowed per marker (calculated at the Overall Population Level) in decimal (ex: 5% is 0.05)", 
                                    value = "", 
                                    width = "100%",
-                                   placeholder = "0.05"),
-                         textInput("naLevel", 
-                                   label = "Please give the Maximum Missing Data Level in decimal (ex: 5% is 0.05)", 
+                                   min=0,
+                                   max=1),
+                         numericInput("naLevel", 
+                                   label = "Please give the Maximum Missing Data Level per marker (calculated at the Overall Population Level) in decimal (ex: 10% is 0.1)", 
                                    value = "", 
                                    width = "100%",
-                                   placeholder = "0.1"),
+                                   min=0,
+                                   max=1),
                          selectInput(inputId = "parentAInput", 
                                      label = "Select designated Sample for Parent A", 
                                      choices = "Pending Upload"),
@@ -66,17 +82,33 @@ ui <- fluidPage(
                      )
                  )
         ),
-        tabPanel("IUPAC", fluid = TRUE,
+        tabPanel("CottonGen Upload Format", fluid = TRUE,
                  sidebarLayout(
                      sidebarPanel(
                          fileInput("file4", "Choose CSV File", accept = ".csv"),
                          #actionButton(inputId = "submit", label = "Submit"),
                          # Button
+                         textInput("projectID", 
+                                   label = "Please give the unique name for your dataset", 
+                                   value = "", 
+                                   width = "100%",
+                                   placeholder = "TAMU_SNP63K_genotype"),
                          downloadButton("downloadIUPAC", "Download")
                          
                      ),
                      mainPanel(
+                         p("Upload Final Report to the server and click download.  This app will convert the genomic SNP data to IUPAC nomenclature and output a csv in the format required to submission to CottonGen."),
+                         p("User will need to open the downloaded file to input the species name for each sample under the 'species' column."),
+                         img(src = "formatImage.PNG", height = 250, width = 400),
+                         br(),
+                         br(),
+                         p("Please email the completed file to: jing.yu@wsu.edu"),
+                         a(actionButton(inputId = "email1", label = "Click to Open Email", 
+                                        icon = icon("envelope", lib = "font-awesome")),
+                           href="mailto:jing.yu@wsu.edu"),
+                         #tags$a(href="https://www.cottongen.org/data/submission", "CottonGen Submission"),
                          plotOutput("IUPACcheck", width = "100%")
+                         
                      )
                  )
         )
@@ -85,19 +117,24 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     options(shiny.maxRequestSize=100*1024^2)
-    dafault_val <- 0.05
-    dafault_val2 <- 0.1
+    default_val <- 0.05
+    default_val2 <- 0.1
+    default_val3 <- 1
     observe({
         if (!is.numeric(input$hetLevel)) {
-            updateNumericInput(session, "hetLevel", value = dafault_val)
+            updateNumericInput(session, "hetLevel", value = default_val)
         }
     })
     observe({
         if (!is.numeric(input$naLevel)) {
-            updateNumericInput(session, "naLevel", value = dafault_val2)
+            updateNumericInput(session, "naLevel", value = default_val2)
         }
     })
-    
+    observe({
+        if (!is.numeric(input$naIndLevel)) {
+            updateNumericInput(session, "naIndLevel", value = default_val3)
+        }
+    })
     data = reactive({
         req(input$file1[1,1])
         
@@ -214,7 +251,7 @@ server <- function(input, output, session) {
                 #create parent matrices of the same dim as population
                 parentA.matrix = matrix(rep(parentA, ncol(f2_keep)), ncol=ncol(parentA))
                 parentB.matrix = matrix(rep(parentB, ncol(f2_keep)), ncol=ncol(parentB))
-                
+
                 #initialize all cells as het initially
                 population.recast[,] <- "H"
                 
@@ -235,7 +272,20 @@ server <- function(input, output, session) {
             #separate into different arrays
             #remove from f2 population array
             dataNoParents <- dataFunctional[ , -which(names(dataFunctional) %in% c(input$parentAInput,input$parentBInput))]
-
+            
+            naPercentInd = apply(dataNoParents, 
+                               MARGIN = 2,
+                               function(x) sum(x %in% c("--"))) / nrow(dataNoParents)
+            
+            if (naPercentInd[1] <= as.numeric(input$naIndLevel)){temp = TRUE
+            } else {temp = FALSE}
+            for(i in 2:length(naPercentInd)){
+                if (naPercentInd[i] <= as.numeric(input$naIndLevel)){tmp = TRUE
+                } else {tmp = FALSE}
+                temp = rbind(temp,tmp)
+            }
+            
+            dataNoParents1 = dataNoParents[,temp]
             #need to drop down to functional markers
             #****
             #*
@@ -254,13 +304,14 @@ server <- function(input, output, session) {
             }
 
             #reduced has markers where the parents are different and neither are het for the marker
-            f2_reduced = dataNoParents[temp,]
+            f2_reduced = dataNoParents1[temp,]
             parentA_reduced = parentA[temp,, drop=FALSE]
             parentB_reduced = parentB[temp,, drop=FALSE]
+
             #now get het of population
             hetPercent = apply(f2_reduced, 
                                MARGIN = 1,
-                               function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(dataFunctional)
+                               function(x) sum(! (x %in% c("AA", "CC", "GG", "TT", "--")))) / ncol(f2_reduced)
             
             if (hetPercent[1] >= as.numeric(input$hetLevel)){temp = TRUE
             } else {temp = FALSE}
@@ -274,9 +325,9 @@ server <- function(input, output, session) {
             parentB_keep1 = parentB_reduced[temp,, drop=FALSE]
             f2_keep1 = f2_reduced[temp,]
 
-            naPercent = apply(f2_reduced, 
+            naPercent = apply(f2_keep1, 
                                MARGIN = 1,
-                               function(x) sum(x %in% c("--"))) / ncol(dataFunctional)
+                               function(x) sum(x %in% c("--"))) / ncol(f2_keep1)
             
             if (naPercent[1] <= as.numeric(input$naLevel)){temp = TRUE
             } else {temp = FALSE}
@@ -288,7 +339,7 @@ server <- function(input, output, session) {
             parentA_keep = parentA_keep1[temp,, drop=FALSE]
             parentB_keep = parentB_keep1[temp,, drop=FALSE]
             f2_keep = f2_keep1[temp,]
-            
+
             population.recast <- makeJoinMapArray(population = f2_keep, parentA = parentA_keep, parentB = parentB_keep)
 
             makeJoinMapF2File(outFile = filename, population.recast = population.recast)
@@ -457,28 +508,43 @@ server <- function(input, output, session) {
             data = as.data.frame(dataIUPAC(), check.names = FALSE)
             
             population.recast <- data
-            population.recast[population == "TT"] <- "T"
-            population.recast[population == "AA"] <- "A"
-            population.recast[population == "CC"] <- "C"
-            population.recast[population == "GG"] <- "G"
-            population.recast[population == "AG"] <- "R"
-            population.recast[population == "GA"] <- "R"
-            population.recast[population == "CT"] <- "Y"
-            population.recast[population == "TC"] <- "Y"
-            population.recast[population == "GT"] <- "K"
-            population.recast[population == "TG"] <- "K"
-            population.recast[population == "AC"] <- "M"
-            population.recast[population == "CA"] <- "M"
-            population.recast[population == "GC"] <- "S"
-            population.recast[population == "CG"] <- "S"
-            population.recast[population == "TA"] <- "W"
-            population.recast[population == "AT"] <- "W"
-            population.recast[population == "--"] <- "-"
+            population.recast[data == "TT"] <- "T"
+            population.recast[data == "AA"] <- "A"
+            population.recast[data == "CC"] <- "C"
+            population.recast[data == "GG"] <- "G"
+            population.recast[data == "AG"] <- "R"
+            population.recast[data == "GA"] <- "R"
+            population.recast[data == "CT"] <- "Y"
+            population.recast[data == "TC"] <- "Y"
+            population.recast[data == "GT"] <- "K"
+            population.recast[data == "TG"] <- "K"
+            population.recast[data == "AC"] <- "M"
+            population.recast[data == "CA"] <- "M"
+            population.recast[data == "GC"] <- "S"
+            population.recast[data == "CG"] <- "S"
+            population.recast[data == "TA"] <- "W"
+            population.recast[data == "AT"] <- "W"
+            population.recast[data == "--"] <- "-"
             temp <- as.data.frame(matrix(unlist(population.recast), nrow=length(unlist(population.recast[1]))))
             population.recast <- temp
-            rownames(population.recast) <- rownames(data)
-            colnames(population.recast) <- colnames(data)
-            write.csv(population.recast, filename, row.names = FALSE)
+            #rownames(population.recast) <- rownames(data)
+            #colnames(population.recast) <- colnames(data)
+            population.recast.t <- t(population.recast)
+            rownames(population.recast.t) <- colnames(data)
+            colnames(population.recast.t) <- rownames(data)
+            colnames(population.recast.t) <- population.recast.t[1,]
+            population.recast.t <- population.recast.t[-1,]
+            species <- rep(NA, times = (nrow(population.recast.t)))
+            genus <- rep("Gossypium", times = (nrow(population.recast.t)))
+            stock_name <- rownames(population.recast.t)
+            iupac <- cbind(stock_name, genus, species, population.recast.t)
+            if (!(is.na(input$projectID))){
+                dataset_name <- rep(input$projectID, times = (nrow(population.recast.t)))
+            } else{
+                dataset_name <- rep(NA, times = (nrow(population.recast.t)))
+            }
+            iupac <- cbind(dataset_name, iupac)
+            write.csv(iupac, filename, na = "", row.names = FALSE)
         }
     )
     output$IUPACcheck <- renderPlot({
