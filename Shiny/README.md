@@ -34,10 +34,14 @@ popt = F3
 
 1. Upload **one** Final Report from Illumina's Genome Studio exported following standard protocol listed here: https://www.cottongen.org/data/community_projects/tamu63k in .csv or .txt format
 
-2.  Download the IUPAC formated .csv.  You will be prompted to name the file (a default name will be suggested) and select a folder on your computer to download to.  The script will output the IUPAC formatted final report to this new file.
+2.  Download the IUPAC formated .csv.  The user will need to open the file and input the species name for each sample under the 'species' column.
 
 ![alt text](https://github.com/ahulsekemp/Cotton_CottonLeafCurlVirus_QTLmapping/blob/main/IUPACFormat/IUPicture4.png?raw=true)
  
- 
+  
 Example final IUPAC .csv file.  (Numbers as the sample name are just placeholders for this example.)
+ 
+ 3. Please email the completed file to: jing.yu@wsu.edu 
+ The email button in the app opens Microsoft Outlook to a new email addresed to the CottonGen currator. 
+ 
 
