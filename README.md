@@ -8,7 +8,7 @@ These scripts were developed for ease of use when analyzing multiple populations
 
 **For easier use, an R Shiny app was developed encasing each of these scripts. Most users can go immediately to using the Shiny app at the link below.** 
 
-# **[Shiny App](https://gbru-ars.shinyapps.io/iCottonQTL/)
+# **[iCottonQTL Shiny Web App](https://gbru-ars.shinyapps.io/iCottonQTL/)
 
 ## Simple Steps to Run Shiny App
 
