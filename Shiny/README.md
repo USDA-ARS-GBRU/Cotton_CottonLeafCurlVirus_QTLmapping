@@ -1,4 +1,4 @@
-# [Shiny App](https://gbru-ars.shinyapps.io/Cotton_CLCV_QTLmapping-JoinMapFileCreatorAndIUPACconverter/)
+# [iCottonQTL Shiny Web App](https://gbru-ars.shinyapps.io/iCottonQTL/)
 
 ## Extended Steps and Notes to Run Shiny App
 
