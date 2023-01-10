@@ -1,0 +1,107 @@
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(reshape2)
+library(gridExtra)
+library(tools)
+
+#All Samples
+bin = c(0,1,2,3,4)
+days90 = c(118,88,62,20,7)
+days120 = c(100,88,71,24,12)
+dfall = data.frame(bin,days90,days120)
+
+dfall.m <- melt(dfall, id.vars='bin')
+
+ggplot(data = dfall.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score") +
+ggtitle("Phenotypic Data 90 and 120 Days After Sowing For All Samples")
+
+
+#Population 1
+bin = c(0,1,2,3,4)
+days90 = c(16,11,20,6,1)
+days120 = c(11,14,17,10,2)
+df1 = data.frame(bin,days90,days120)
+
+df1.m <- melt(df1, id.vars='bin')
+
+df1.plot <- ggplot(data = df1.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score")
+
+
+#Population 2-3
+bin = c(0,1,2,3,4)
+days90 = c(54,12,6,1,0)
+days120 = c(52,9,11,1,0)
+df23 = data.frame(bin,days90,days120)
+
+df23.m <- melt(df23, id.vars='bin')
+
+df23.plot <- ggplot(data = df23.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score")
+
+#Population 4
+bin = c(0,1,2,3,4)
+days90 = c(2,7,11,5,0)
+days120 = c(0,9,8,7,1)
+df4 = data.frame(bin,days90,days120)
+
+df4.m <- melt(df4, id.vars='bin')
+
+df4.plot <- ggplot(data = df4.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score")
+
+#Population 5
+bin = c(0,1,2,3,4)
+days90 = c(14,4,9,1,1)
+days120 = c(11,5,9,3,1)
+df5 = data.frame(bin,days90,days120)
+
+df5.m <- melt(df5, id.vars='bin')
+
+df5.plot <- ggplot(data = df5.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score")
+
+
+#Population 4-5
+bin = c(0,1,2,3,4)
+days90 = c(16,11,20,6,1)
+days120 = c(11,14,17,10,2)
+df45 = data.frame(bin,days90,days120)
+
+df45.m <- melt(df45, id.vars='bin')
+
+df45.plot <- ggplot(data = df45.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score")
+
+
+#Population 6
+bin = c(0,1,2,3,4)
+days90 = c(6,20,10,3,1)
+days120 = c(5,18,11,4,2)
+df6 = data.frame(bin,days90,days120)
+
+df6.m <- melt(df6, id.vars='bin')
+
+df6.plot <- ggplot(data = df6.m, mapping = aes(bin, value)) +
+geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
+scale_fill_discrete(name = "Days After Sowing", labels = c("90", "120")) +
+ylab("Number of Individuals") + xlab("Phenotypic Score")
+
+library(ggpubr)
+ggarrange(df1.plot, df23.plot, df4.plot, df5.plot, df45.plot, df6.plot,
+           labels = c("A", "B", "C", "D", "E", "F"),
+           ncol = 2, nrow = 3)

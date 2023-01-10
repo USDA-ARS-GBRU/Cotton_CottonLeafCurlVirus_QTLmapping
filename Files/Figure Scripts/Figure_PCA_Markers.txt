@@ -1,0 +1,73 @@
+library(dplyr)
+library(zoo)
+library(tibble)
+
+population <- pop45.keep
+parentA <- md26neXtx1145genes.both.keep
+parentB <- tx1145Xmd26negenes.both.keep
+#*
+#pc.res <- prcomp(pcamatrix)$x %>% as.data.frame %>% rownames_to_column
+
+#pcamatrix <- scale(t(data.matrix(pcamatrix)))
+population.recast.pop45 <- population.recast
+pcamatrix = data.matrix(matrix(0, nrow=nrow(population.recast.pop45), ncol=ncol(population.recast.pop45)))
+pcamatrix[which(population.recast.pop45 == "H", arr.ind = TRUE)] <- 1
+pcamatrix[which(population.recast.pop45 == "B", arr.ind = TRUE)] <- 2
+pcamatrix[which(population.recast.pop45 == "-", arr.ind = TRUE)] <- NA
+pcamatrix[] <- t(na.aggregate(t(pcamatrix)))
+rownames(pcamatrix) <- rownames(population.recast.pop45)
+colnames(pcamatrix) <- colnames(population.recast.pop45)
+pc.res <- prcomp(pcamatrix)$x %>% as.data.frame %>% rownames_to_column
+pcamatrixt <- t(data.matrix(pcamatrix))
+pc.res.t <- prcomp(pcamatrixt)$x %>% as.data.frame %>% rownames_to_column
+
+populations = c("pop4", "pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4", "pop4", "pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4","pop4", "pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5","pop5")
+pc.res.t.labels = cbind(populations, pc.res.t)
+names(pc.res.t.labels)[names(pc.res.t.labels) == "populations"] <- "Population"
+pc.res.t.labels[pc.res.t.labels == "pop4"] <- "Population 4"
+pc.res.t.labels[pc.res.t.labels == "pop5"] <- "Population 5"
+ggplot(pc.res.t.labels,
+        aes(x = PC1, y = PC2, label = rowname, color = Population)) +
+     geom_point() + 
+xlim(-50, 60) +
+ylim(-50,60) +
+ylab("PC2 (10.6%)") +
+xlab("PC1 (15.1%)")
+
+
+#pop23
+#pc.res <- prcomp(pcamatrix)$x %>% as.data.frame %>% rownames_to_column
+
+population <- pop23.keep
+parentA <- mac1238Xtx1145genes.both.keep
+parentB <- tx1145Xmac1238genes.both.keep
+
+#pcamatrix <- scale(t(data.matrix(pcamatrix)))
+population.recast.pop23 <- population.recast
+
+pcamatrix = data.matrix(matrix(0, nrow=nrow(population.recast.pop23), ncol=ncol(population.recast.pop23)))
+pcamatrix[which(population.recast.pop23 == "H", arr.ind = TRUE)] <- 1
+pcamatrix[which(population.recast.pop23 == "B", arr.ind = TRUE)] <- 2
+pcamatrix[which(population.recast.pop23 == "-", arr.ind = TRUE)] <- NA
+pcamatrix[] <- t(na.aggregate(t(pcamatrix)))
+rownames(pcamatrix) <- rownames(population.recast.pop23)
+colnames(pcamatrix) <- colnames(population.recast.pop23)
+pc.res <- prcomp(pcamatrix)$x %>% as.data.frame %>% rownames_to_column
+pcamatrixt <- t(data.matrix(pcamatrix))
+pc.res.t <- prcomp(pcamatrixt)$x %>% as.data.frame %>% rownames_to_column
+populations = c("pop2", "pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2", "pop2", "pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2","pop2", "pop2","pop2","pop2","pop2","pop2","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3","pop3")
+pc.res.t.labels = cbind(populations, pc.res.t)
+names(pc.res.t.labels)[names(pc.res.t.labels) == "populations"] <- "Population"
+pc.res.t.labels[pc.res.t.labels == "pop2"] <- "Population 2"
+pc.res.t.labels[pc.res.t.labels == "pop3"] <- "Population 3"
+ggplot(pc.res.t.labels,
+        aes(x = PC1, y = PC2, label = rowname, color = Population)) +
+     geom_point()
+
+ggplot(pc.res.t.labels,
+        aes(x = PC1, y = PC2, label = rowname, color = Population)) +
+     geom_point() + 
+     xlim(-50, 50) +
+ylim(-50,50) +
+ylab("PC2 (5.7%)") +
+xlab("PC1 (15.1%)")
