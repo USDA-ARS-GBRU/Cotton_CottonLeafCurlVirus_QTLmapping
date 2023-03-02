@@ -33,7 +33,7 @@ These scripts were developed for ease of use when analyzing multiple populations
 2.  Download the IUPAC formated .csv
 
 
-**related to this paper **
+**related to this paper**
 
 **cite**
 
