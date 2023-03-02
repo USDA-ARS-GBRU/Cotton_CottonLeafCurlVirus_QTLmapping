@@ -36,6 +36,7 @@ These scripts were developed for ease of use when analyzing multiple populations
 **related to ** this paper **
 
 **cite**
+Schoonmaker, A.N.; Hulse-Kemp, A.M.; Youngblood, R.C.; Rahmat, Z.; Atif Iqbal, M.; Rahman, M.-u.; Kochan, K.J.; Scheffler, B.E.; Scheffler, J.A. Detecting Cotton Leaf Curl Virus Resistance Quantitative Trait Loci in Gossypium hirsutum and iCottonQTL a New R/Shiny App to Streamline Genetic Mapping. Plants 2023, 12, x. https://doi.org/10.3390/xxxxx
 
 
 Hulse-Kemp, A. M., Lemm, J., Plieske, J., Ashrafi, H., Buyyarapu, R., Fang, D. D., … Stelly, D. M. (2015). Development of a 63K SNP Array for Cotton and High-Density Mapping of Intraspecific and Interspecific Populations of Gossypium spp. G3&amp;#58; Genes|Genomes|Genetics, 5(6), 1187–1209. https://doi.org/10.1534/g3.115.018416
