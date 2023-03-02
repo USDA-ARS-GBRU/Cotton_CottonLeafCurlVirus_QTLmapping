@@ -33,9 +33,10 @@ These scripts were developed for ease of use when analyzing multiple populations
 2.  Download the IUPAC formated .csv
 
 
-**related to ** this paper **
+**related to this paper **
 
 **cite**
+
 Schoonmaker, A.N.; Hulse-Kemp, A.M.; Youngblood, R.C.; Rahmat, Z.; Atif Iqbal, M.; Rahman, M.-u.; Kochan, K.J.; Scheffler, B.E.; Scheffler, J.A. Detecting Cotton Leaf Curl Virus Resistance Quantitative Trait Loci in Gossypium hirsutum and iCottonQTL a New R/Shiny App to Streamline Genetic Mapping. Plants 2023, 12, x. https://doi.org/10.3390/xxxxx
 
 
