@@ -36,7 +36,7 @@ ui <- fluidPage(
                          tags$a(href="https://github.com/USDA-ARS-GBRU/Cotton_CottonLeafCurlVirus_QTLmapping/tree/main/Shiny/Example%20Files", "Example Files"),
                          fileInput("file1", "Choose TXT/CSV Final Report File(s)", multiple = TRUE, accept = c("text/csv", 
                                                                                                                "text/comma-separated-values,text/plain",
-                                                                                                               ".csv", ".txt")),
+                                                                                                               ".csv", ".txt", ".txt.gz")),
                          fileInput("file3", "Optional: Choose TXT File Containing List of Sample Names", accept = c("text/csv", 
                                                                                                                     "text/comma-separated-values,text/plain",
                                                                                                                     ".csv", ".txt")),
@@ -141,8 +141,10 @@ server <- function(input, output, session) {
         if (tolower(tools::file_ext(input$file1[[1, 'datapath']])) == "csv")
         {
             data <- read.csv(input$file1[[1, 'datapath']], skip = 9, check.names = FALSE)
-        } else
-        {
+        } else if (tolower(tools::file_ext(input$file1[[1, 'datapath']])) == "gz") {
+            data <- read.delim(gzfile(input$file1[[1, 'datapath']]), skip = 9, check.names = FALSE)
+            }
+        else {
             data <- read.delim(input$file1[[1, 'datapath']], skip = 9, check.names = FALSE)
         }
         if(nrow(input$file1) > 1){
@@ -388,7 +390,8 @@ server <- function(input, output, session) {
                 'text',
                 'txt',
                 'csv',
-                'tsv'
+                'tsv',
+                'gz'
             ), "Wrong File Format try again!"))
         stopVar = "good"
         for(i in 1:length(input$file1[,1])){
@@ -408,7 +411,13 @@ server <- function(input, output, session) {
                     #if the Report file is incorrect, throw an error and exit the script
                     #stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
                     stopVar = "good"
-                } else{
+                } else if (isTRUE(tmp[1,i] %in% c("TT", "TC", "CC", "--")) &&
+                          isTRUE(tmp[2,i] %in% c("AA", "AG", "GG", "--")) &&
+                          isTRUE(tmp[3,i] %in% c("AA", "AG", "GG", "--")) && 
+                          isTRUE(tmp[4,i] %in% c("AA", "AC", "CC", "--")) && 
+                          isTRUE(tmp[5,i] %in% c("AA", "AC", "CC", "--"))) {
+                    stopVar = "good"
+                } else {
                     stopVar = "bad"
                     validate(
                         need(stopVar == "good", "Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
@@ -575,6 +584,15 @@ server <- function(input, output, session) {
             tmp <- tmp[,-1]
             for (i in 1:ncol(tmp)){
                 if (isTRUE(tmp[1,i] == "TT" || tmp[1,i] == "--") && isTRUE(tmp[2,i] == "CC" || tmp[2,i] == "--") && isTRUE(tmp[3,i] == "TT" || tmp[3,i] == "--") && isTRUE(tmp[4,i] == "GG" || tmp[4,i] == "--") && isTRUE(tmp[5,i] == "AA" || tmp[5,i] == "--") && isTRUE(tmp[6,i] == "--") && isTRUE(tmp[7,i] == "TT" || tmp[7,i] == "--") && isTRUE(tmp[8,i] == "AC" || tmp[8,i] == "--")){
+                    #if the Report file is incorrect, throw an error and exit the script
+                    #stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
+                    stopVar = "good"
+                } else if (isTRUE(tmp[1,i] %in% c("TT", "TC", "CC", "--")) &&
+                           isTRUE(tmp[2,i] %in% c("AA", "AG", "GG", "--")) &&
+                           isTRUE(tmp[3,i] %in% c("AA", "AG", "GG", "--")) && 
+                           isTRUE(tmp[4,i] %in% c("AA", "AC", "CC", "--")) && 
+                           isTRUE(tmp[5,i] %in% c("AA", "AC", "CC", "--"))) {
+                    # THIS test is for the 27K array
                     #if the Report file is incorrect, throw an error and exit the script
                     #stop("Your Final Report is not in the correct format.  Please refer back to GenomeStudio and print the Final Report as a tab-delimited matrix according to the rules found here https://www.cottongen.org/data/community_projects/tamu63k")
                     stopVar = "good"
